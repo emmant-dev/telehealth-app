@@ -1,9 +1,23 @@
 export type UserRole = "patient" | "doctor";
 
 export interface AuthUser {
+  _id?: string;
   id: string;
   email?: string;
   role: UserRole;
+}
+
+export interface UserReference {
+  _id?: string;
+  id?: string;
+  name?: string;
+  email?: string;
+  role?: UserRole;
+  birthday?: string;
+  weightKg?: number;
+  heightCm?: number;
+  contactNumber?: string;
+  basicMedicalHistory?: string;
 }
 
 export interface AuthResponse {
@@ -44,7 +58,7 @@ export interface PatientProfile {
 
 export interface DoctorProfile {
   _id: string;
-  user: AuthUser | string;
+  user: UserReference | string;
   name: string;
   bio?: string;
   specialization: string;
@@ -54,20 +68,31 @@ export interface DoctorProfile {
   unavailableSlots: string[];
 }
 
+export type DoctorLike = Partial<DoctorProfile> & UserReference;
+
 export interface Appointment {
   _id: string;
-  patient: AuthUser | string;
-  doctor: AuthUser | string;
+  patient: UserReference | string;
+  doctor: UserReference | string;
+  doctorId?: string;
+  doctor_id?: string;
+  DoctorData?: DoctorLike;
+  LabData?: {
+    doctor_id?: string;
+    DoctorData?: DoctorLike;
+    doctor?: DoctorLike;
+  };
   appointmentAt: string;
   status: "pending" | "confirmed" | "cancelled" | "completed";
   reason?: string;
   meetingLink?: string;
+  sessionUrl?: string;
 }
 
 export interface MedicalRecord {
   _id: string;
-  patient: AuthUser | string;
-  doctor: AuthUser | string;
+  patient: UserReference | string;
+  doctor: UserReference | string;
   appointment: Appointment | string;
   notes: string;
   prescription?: string;

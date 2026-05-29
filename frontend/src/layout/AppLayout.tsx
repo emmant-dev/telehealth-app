@@ -21,9 +21,20 @@ function AppLayout() {
           padding: 16
         }}
       >
-        <Link to={user?.role === "doctor" ? "/doctor/dashboard" : "/patient/dashboard"}>
-          Telehealth MVP
-        </Link>
+        <nav style={{ display: "flex", gap: 12, alignItems: "center" }}>
+          <Link to={user?.role === "doctor" ? "/doctor/dashboard" : "/patient/dashboard"}>
+            Telehealth MVP
+          </Link>
+          {user?.role === "patient" && (
+            <>
+              <Link to="/patient/profile">Profile</Link>
+              <Link to="/patient/doctors">Doctors</Link>
+              <Link to="/patient/appointments">Appointments</Link>
+              <Link to="/patient/records">Records</Link>
+            </>
+          )}
+          {user?.role === "doctor" && <Link to="/doctor/dashboard">Today</Link>}
+        </nav>
         <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
           <span>{user?.role}</span>
           <button type="button" onClick={handleLogout}>
