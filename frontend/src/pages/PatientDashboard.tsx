@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { appointmentApi } from "../api/appointment.api";
 import { notificationApi } from "../api/notification.api";
 import { patientApi } from "../api/patient.api";
@@ -36,6 +37,21 @@ function PatientDashboard() {
       <section>
         <h2>Profile</h2>
         <p>{profile ? profile.name : "Loading profile..."}</p>
+        <p>
+          <Link to="/patient/profile">Complete or update my profile</Link>
+        </p>
+      </section>
+      <section>
+        <h2>Actions</h2>
+        <p>
+          <Link to="/patient/doctors">View doctors and book an appointment</Link>
+        </p>
+        <p>
+          <Link to="/patient/appointments">View my appointments</Link>
+        </p>
+        <p>
+          <Link to="/patient/records">View medical records</Link>
+        </p>
       </section>
       <section>
         <h2>Appointments</h2>

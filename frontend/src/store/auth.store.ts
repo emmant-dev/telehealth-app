@@ -15,6 +15,8 @@ interface AuthState {
   logout: () => void;
 }
 
+let initializePromise: Promise<void> | null = null;
+
 export const useAuthStore = create<AuthState>((set) => ({
   user: null,
   token: tokenStorage.get(),
@@ -23,26 +25,34 @@ export const useAuthStore = create<AuthState>((set) => ({
   isLoading: true,
 
   async initialize() {
-    const token = tokenStorage.get();
-
-    if (!token) {
-      set({ user: null, token: null, role: null, isAuthenticated: false, isLoading: false });
-      return;
+    if (initializePromise) {
+      return initializePromise;
     }
 
-    try {
-      const user = await authApi.me();
-      set({
-        user,
-        token,
-        role: user.role,
-        isAuthenticated: true,
-        isLoading: false
-      });
-    } catch {
-      tokenStorage.clear();
-      set({ user: null, token: null, role: null, isAuthenticated: false, isLoading: false });
-    }
+    initializePromise = (async () => {
+      const token = tokenStorage.get();
+
+      if (!token) {
+        set({ user: null, token: null, role: null, isAuthenticated: false, isLoading: false });
+        return;
+      }
+
+      try {
+        const user = await authApi.me();
+        set({
+          user,
+          token,
+          role: user.role,
+          isAuthenticated: true,
+          isLoading: false
+        });
+      } catch {
+        tokenStorage.clear();
+        set({ user: null, token: null, role: null, isAuthenticated: false, isLoading: false });
+      }
+    })();
+
+    return initializePromise;
   },
 
   async login(payload) {
@@ -60,6 +70,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   },
 
   logout() {
+    initializePromise = null;
     tokenStorage.clear();
     set({ user: null, token: null, role: null, isAuthenticated: false, isLoading: false });
   }
