@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { medicalApi } from "../api/medical.api";
 import { patientApi } from "../api/patient.api";
 import type { Appointment, MedicalRecord } from "../types";
@@ -8,6 +8,7 @@ import {
   getRecordAppointmentId,
   parseMedicalNotes
 } from "../utils/display";
+import { subscribeToRefreshEvents } from "../utils/refreshEvents";
 
 interface HistoryEntry {
   appointment: Appointment;
@@ -21,10 +22,26 @@ function PatientRecords() {
   const [error, setError] = useState("");
   const [loadedAt] = useState(() => Date.now());
 
+  const loadHistory = useCallback(async () => {
+    setError("");
+
+    try {
+      const [appointmentList, recordList] = await Promise.all([
+        patientApi.getAppointments(),
+        medicalApi.listMine()
+      ]);
+
+      setAppointments(appointmentList);
+      setRecords(recordList);
+    } catch (caughtError) {
+      setError(caughtError instanceof Error ? caughtError.message : "Unable to load medical history");
+    }
+  }, []);
+
   useEffect(() => {
     let isMounted = true;
 
-    const loadHistory = async () => {
+    const loadInitialHistory = async () => {
       try {
         const [appointmentList, recordList] = await Promise.all([
           patientApi.getAppointments(),
@@ -46,12 +63,20 @@ function PatientRecords() {
       }
     };
 
-    void loadHistory();
+    void loadInitialHistory();
 
     return () => {
       isMounted = false;
     };
   }, []);
+
+  useEffect(() => {
+    return subscribeToRefreshEvents((eventType) => {
+      if (eventType === "appointments" || eventType === "medical-records") {
+        void loadHistory();
+      }
+    });
+  }, [loadHistory]);
 
   const historyEntries = useMemo<HistoryEntry[]>(() => {
     const recordByAppointmentId = new Map(

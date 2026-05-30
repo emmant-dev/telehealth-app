@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
+import toast from "react-hot-toast";
 import { patientApi } from "../api/patient.api";
 import type { PatientProfile as PatientProfileType } from "../types";
 
@@ -32,7 +33,6 @@ function PatientProfile() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
-  const [successMessage, setSuccessMessage] = useState("");
 
   useEffect(() => {
     let isMounted = true;
@@ -77,20 +77,22 @@ function PatientProfile() {
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setError("");
-    setSuccessMessage("");
 
     if (!form.name.trim()) {
       setError("Name is required.");
+      toast.error("Name is required.");
       return;
     }
 
     if (form.weightKg && Number(form.weightKg) < 0) {
       setError("Weight cannot be negative.");
+      toast.error("Weight cannot be negative.");
       return;
     }
 
     if (form.heightCm && Number(form.heightCm) < 0) {
       setError("Height cannot be negative.");
+      toast.error("Height cannot be negative.");
       return;
     }
 
@@ -105,12 +107,15 @@ function PatientProfile() {
     };
 
     setIsSubmitting(true);
+    const toastId = toast.loading("Saving profile...");
 
     try {
       await patientApi.updateMe(payload);
-      setSuccessMessage("Profile updated.");
+      toast.success("Profile updated", { id: toastId });
     } catch (caughtError) {
-      setError(caughtError instanceof Error ? caughtError.message : "Unable to update profile");
+      const message = caughtError instanceof Error ? caughtError.message : "Unable to update profile";
+      setError(message);
+      toast.error(message, { id: toastId });
     } finally {
       setIsSubmitting(false);
     }
@@ -121,7 +126,6 @@ function PatientProfile() {
       <h1>Patient Profile</h1>
       {isLoading && <p>Loading profile...</p>}
       {error && <p role="alert">{error}</p>}
-      {successMessage && <p role="status">{successMessage}</p>}
       {!isLoading && (
         <form onSubmit={handleSubmit} style={{ display: "grid", gap: 12, maxWidth: 560 }}>
           <label>

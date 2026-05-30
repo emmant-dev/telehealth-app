@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
+import toast from "react-hot-toast";
 import { Link, useLocation, useParams } from "react-router-dom";
 import { appointmentApi } from "../api/appointment.api";
 import { doctorApi } from "../api/doctor.api";
 import type { DoctorLike, DoctorProfile } from "../types";
-import { getDoctorLikeId, getDoctorName, getDoctorUserId } from "../utils/display";
+import { getDoctorLikeId, getDoctorName, getDoctorUserId, parseDoctorBio } from "../utils/display";
+import { emitRefreshEvent } from "../utils/refreshEvents";
 
 interface LocationState {
   doctor?: DoctorLike | DoctorProfile | string | null;
@@ -22,7 +24,6 @@ function PatientDoctorDetail() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
-  const [successMessage, setSuccessMessage] = useState("");
 
   useEffect(() => {
     let isMounted = true;
@@ -73,15 +74,16 @@ function PatientDoctorDetail() {
   const handleBook = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setError("");
-    setSuccessMessage("");
 
     if (!doctor) {
       setError("Doctor profile is not loaded yet.");
+      toast.error("Doctor profile is not loaded yet.");
       return;
     }
 
     if (!appointmentAt) {
       setError("Appointment date and time is required.");
+      toast.error("Appointment date and time is required.");
       return;
     }
 
@@ -90,10 +92,12 @@ function PatientDoctorDetail() {
 
     if (!doctorId) {
       setError("This doctor cannot be booked because doctor information is unavailable.");
+      toast.error("This doctor cannot be booked because doctor information is unavailable.");
       return;
     }
 
     setIsSubmitting(true);
+    const toastId = toast.loading("Booking appointment...");
 
     try {
       await appointmentApi.book({
@@ -103,9 +107,12 @@ function PatientDoctorDetail() {
       });
       setAppointmentAt("");
       setReason("");
-      setSuccessMessage("Appointment request submitted.");
+      toast.success("New appointment booked", { id: toastId });
+      emitRefreshEvent("appointments");
     } catch (caughtError) {
-      setError(caughtError instanceof Error ? caughtError.message : "Unable to book appointment");
+      const message = caughtError instanceof Error ? caughtError.message : "Unable to book appointment";
+      setError(message);
+      toast.error(message, { id: toastId });
     } finally {
       setIsSubmitting(false);
     }
@@ -118,7 +125,6 @@ function PatientDoctorDetail() {
       </p>
       <h1>Doctor Details</h1>
       {error && <p role="alert">{error}</p>}
-      {successMessage && <p role="status">{successMessage}</p>}
       {isLoading && <p>Loading doctor...</p>}
       {!isLoading && !doctor && !error && <p>Doctor information unavailable for this appointment</p>}
 
@@ -126,9 +132,10 @@ function PatientDoctorDetail() {
         <>
           <section>
             <h2>{getDoctorName(doctor)}</h2>
-            <p>{doctor.specialization || "Specialization unavailable"}</p>
-            {doctor.bio && <p>{doctor.bio}</p>}
-            {doctor.contactNumber && <p>{doctor.contactNumber}</p>}
+            <p>Specialization: {doctor.specialization || "Specialization unavailable"}</p>
+            <p>Bio: {parseDoctorBio(doctor.bio).bio || "Not provided"}</p>
+            <p>Experience: {parseDoctorBio(doctor.bio).experience || "Not provided"}</p>
+            <p>Contact: {doctor.contactNumber || "Not provided"}</p>
           </section>
 
           <section>

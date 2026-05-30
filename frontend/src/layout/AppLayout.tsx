@@ -33,7 +33,12 @@ function AppLayout() {
               <Link to="/patient/records">Records</Link>
             </>
           )}
-          {user?.role === "doctor" && <Link to="/doctor/dashboard">Today</Link>}
+          {user?.role === "doctor" && (
+            <>
+              <Link to="/doctor/dashboard">Appointments</Link>
+              <Link to="/doctor/profile">Profile</Link>
+            </>
+          )}
         </nav>
         <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
           <span>{user?.role}</span>

@@ -1,5 +1,7 @@
 import type { Appointment, DoctorLike, DoctorProfile, MedicalRecord, UserReference } from "../types";
 
+const doctorExperiencePattern = /\[Experience\]\s*([\s\S]*?)\s*\[Bio\]\s*([\s\S]*)/i;
+
 export const getUserId = (user: UserReference | string): string => {
   if (typeof user === "string") {
     return user;
@@ -17,10 +19,40 @@ export const getUserLabel = (user: UserReference | string): string => {
 };
 
 export const formatAppointmentDate = (appointmentAt: string): string => {
+  const appointmentDate = new Date(appointmentAt);
+
+  if (Number.isNaN(appointmentDate.getTime())) {
+    return "Date unavailable";
+  }
+
   return new Intl.DateTimeFormat(undefined, {
     dateStyle: "medium",
     timeStyle: "short"
-  }).format(new Date(appointmentAt));
+  }).format(appointmentDate);
+};
+
+export const formatAppointmentTime = (appointmentAt: string): string => {
+  const appointmentDate = new Date(appointmentAt);
+
+  if (Number.isNaN(appointmentDate.getTime())) {
+    return "Time unavailable";
+  }
+
+  return new Intl.DateTimeFormat(undefined, {
+    timeStyle: "short"
+  }).format(appointmentDate);
+};
+
+export const getAppointmentTimestamp = (appointmentAt?: string): number => {
+  if (!appointmentAt) {
+    return Number.NaN;
+  }
+
+  return new Date(appointmentAt).getTime();
+};
+
+export const hasValidAppointmentDate = (appointmentAt?: string): boolean => {
+  return !Number.isNaN(getAppointmentTimestamp(appointmentAt));
 };
 
 export const getDoctorUserId = (doctor: DoctorProfile): string => {
@@ -76,6 +108,48 @@ export const getDoctorName = (doctor?: DoctorLike | UserReference | string | nul
   }
 
   return doctor.name || doctor.email || doctor.id || doctor._id || "Doctor information unavailable";
+};
+
+export const parseDoctorBio = (rawBio?: string): { bio: string; experience: string } => {
+  if (!rawBio?.trim()) {
+    return { bio: "", experience: "" };
+  }
+
+  const structuredBio = rawBio.match(doctorExperiencePattern);
+
+  if (!structuredBio) {
+    return { bio: rawBio.trim(), experience: "" };
+  }
+
+  return {
+    experience: structuredBio[1]?.trim() || "",
+    bio: structuredBio[2]?.trim() || ""
+  };
+};
+
+export const formatDoctorBio = (bio: string, experience: string): string | undefined => {
+  const trimmedBio = bio.trim();
+  const trimmedExperience = experience.trim();
+
+  if (!trimmedBio && !trimmedExperience) {
+    return undefined;
+  }
+
+  if (!trimmedExperience) {
+    return trimmedBio;
+  }
+
+  return `[Experience]\n${trimmedExperience}\n\n[Bio]\n${trimmedBio || "Not provided"}`;
+};
+
+export const isDoctorProfileComplete = (doctor?: Pick<DoctorProfile, "name" | "bio" | "specialization"> | null): boolean => {
+  if (!doctor) {
+    return false;
+  }
+
+  const parsedBio = parseDoctorBio(doctor.bio);
+
+  return Boolean(doctor.name?.trim() && doctor.specialization?.trim() && parsedBio.bio.trim());
 };
 
 export const getAppointmentCounterparty = (

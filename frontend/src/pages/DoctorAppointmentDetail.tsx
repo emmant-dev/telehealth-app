@@ -1,19 +1,23 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { FormEvent } from "react";
+import toast from "react-hot-toast";
 import { Link, useParams } from "react-router-dom";
 import { appointmentApi } from "../api/appointment.api";
-import { doctorApi } from "../api/doctor.api";
 import { medicalApi } from "../api/medical.api";
+import { useDoctorAppointments } from "../hooks/useDoctorAppointments";
 import type { Appointment, MedicalRecord, UserReference } from "../types";
 import {
   formatAppointmentDate,
   getAppointmentPatientId,
+  getAppointmentTimestamp,
   getConsultationLink,
   getRecordAppointmentId,
   getRecordPatientId,
   getUserLabel,
+  hasValidAppointmentDate,
   parseMedicalNotes
 } from "../utils/display";
+import { emitRefreshEvent } from "../utils/refreshEvents";
 
 const getPatientInfo = (appointment: Appointment): UserReference | null => {
   return typeof appointment.patient === "string" ? null : appointment.patient;
@@ -48,7 +52,17 @@ function DoctorAppointmentDetail() {
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
   const [isSavingNotes, setIsSavingNotes] = useState(false);
   const [error, setError] = useState("");
-  const [successMessage, setSuccessMessage] = useState("");
+  const {
+    appointments: doctorAppointments,
+    error: appointmentRefreshError,
+    isLoading: isLoadingAppointments,
+    refreshAppointments
+  } = useDoctorAppointments({
+    enableFocusRefresh: true,
+    enablePolling: true,
+    notifyOnChanges: true,
+    pollIntervalMs: 15000
+  });
 
   useEffect(() => {
     let isMounted = true;
@@ -60,12 +74,13 @@ function DoctorAppointmentDetail() {
         return;
       }
 
+      if (isLoadingAppointments) {
+        return;
+      }
+
       try {
-        const [appointments, records] = await Promise.all([
-          doctorApi.getAppointments(),
-          medicalApi.listMine()
-        ]);
-        const foundAppointment = appointments.find((item) => item._id === id);
+        const records = await medicalApi.listMine();
+        const foundAppointment = doctorAppointments.find((item) => item._id === id);
         const foundRecord = records.find((record) => getRecordAppointmentId(record) === id);
         const patientId = foundAppointment ? getAppointmentPatientId(foundAppointment) : "";
         const matchingHistory = patientId
@@ -99,7 +114,7 @@ function DoctorAppointmentDetail() {
     return () => {
       isMounted = false;
     };
-  }, [id]);
+  }, [doctorAppointments, id, isLoadingAppointments]);
 
   const updateStatus = async (status: Appointment["status"]) => {
     if (!appointment) {
@@ -107,17 +122,30 @@ function DoctorAppointmentDetail() {
     }
 
     setError("");
-    setSuccessMessage("");
     setIsUpdatingStatus(true);
+    const toastId = toast.loading("Updating appointment...");
 
     try {
       const updatedAppointment = await appointmentApi.updateStatus(appointment._id, status);
       setAppointment((current) =>
         current ? { ...current, status: updatedAppointment.status } : updatedAppointment
       );
-      setSuccessMessage(`Appointment marked as ${status}.`);
+      await refreshAppointments({ detectChanges: false });
+      let statusMessage = "Appointment cancelled";
+
+      if (status === "confirmed") {
+        statusMessage = "Appointment confirmed by doctor";
+      }
+
+      if (status === "completed") {
+        statusMessage = "Consultation completed";
+      }
+
+      toast(statusMessage, { id: toastId });
     } catch (caughtError) {
-      setError(caughtError instanceof Error ? caughtError.message : "Unable to update status");
+      const message = caughtError instanceof Error ? caughtError.message : "Unable to update status";
+      setError(message);
+      toast.error(message, { id: toastId });
     } finally {
       setIsUpdatingStatus(false);
     }
@@ -135,12 +163,13 @@ function DoctorAppointmentDetail() {
 
     if (!trimmedNotes && !trimmedDiagnosis) {
       setError("Add consultation notes or diagnosis before saving.");
+      toast.error("Add consultation notes or diagnosis before saving.");
       return;
     }
 
     setError("");
-    setSuccessMessage("");
     setIsSavingNotes(true);
+    const toastId = toast.loading("Saving medical record...");
 
     const combinedNotes = [
       trimmedDiagnosis ? `Diagnosis: ${trimmedDiagnosis}` : "",
@@ -170,12 +199,15 @@ function DoctorAppointmentDetail() {
 
         return [savedRecord, ...current];
       });
-      setSuccessMessage("Consultation notes saved.");
       setNotes("");
       setDiagnosis("");
       setPrescription("");
+      toast.success("Medical record updated", { id: toastId });
+      emitRefreshEvent("medical-records");
     } catch (caughtError) {
-      setError(caughtError instanceof Error ? caughtError.message : "Unable to save notes");
+      const message = caughtError instanceof Error ? caughtError.message : "Unable to save notes";
+      setError(message);
+      toast.error(message, { id: toastId });
     } finally {
       setIsSavingNotes(false);
     }
@@ -184,6 +216,30 @@ function DoctorAppointmentDetail() {
   const patientInfo = appointment ? getPatientInfo(appointment) : null;
   const jitsiLink = appointment ? getConsultationLink(appointment._id) : "";
   const parsedSavedRecord = parseMedicalNotes(medicalRecord?.notes);
+  const sortedPatientHistory = useMemo(() => {
+    return [...patientHistory].sort((firstRecord, secondRecord) => {
+      const firstAppointment =
+        typeof firstRecord.appointment === "string"
+          ? doctorAppointments.find((item) => item._id === firstRecord.appointment)
+          : firstRecord.appointment;
+      const secondAppointment =
+        typeof secondRecord.appointment === "string"
+          ? doctorAppointments.find((item) => item._id === secondRecord.appointment)
+          : secondRecord.appointment;
+      const firstTime = getAppointmentTimestamp(firstAppointment?.appointmentAt);
+      const secondTime = getAppointmentTimestamp(secondAppointment?.appointmentAt);
+
+      if (Number.isNaN(firstTime)) {
+        return 1;
+      }
+
+      if (Number.isNaN(secondTime)) {
+        return -1;
+      }
+
+      return secondTime - firstTime;
+    });
+  }, [doctorAppointments, patientHistory]);
 
   return (
     <main style={{ padding: 24 }}>
@@ -191,9 +247,8 @@ function DoctorAppointmentDetail() {
         <Link to="/doctor/dashboard">Back to dashboard</Link>
       </p>
       <h1>Appointment Detail</h1>
-      {error && <p role="alert">{error}</p>}
-      {successMessage && <p role="status">{successMessage}</p>}
-      {isLoading && <p>Loading appointment...</p>}
+      {(error || appointmentRefreshError) && <p role="alert">{error || appointmentRefreshError}</p>}
+      {(isLoading || isLoadingAppointments) && <p>Loading appointment...</p>}
 
       {appointment && (
         <>
@@ -296,14 +351,25 @@ function DoctorAppointmentDetail() {
 
           <section>
             <h2>Patient Medical History</h2>
-            {patientHistory.length === 0 && <p>No medical history available.</p>}
+            {sortedPatientHistory.length === 0 && <p>No medical history available.</p>}
             <div style={{ display: "grid", gap: 12 }}>
-              {patientHistory.map((record) => {
+              {sortedPatientHistory.map((record) => {
                 const parsedRecord = parseMedicalNotes(record.notes);
+                const historyAppointment =
+                  typeof record.appointment === "string"
+                    ? doctorAppointments.find((item) => item._id === record.appointment)
+                    : record.appointment;
+                const appointmentLabel = hasValidAppointmentDate(historyAppointment?.appointmentAt)
+                  ? formatAppointmentDate(historyAppointment?.appointmentAt || "")
+                  : "Appointment date unavailable";
 
                 return (
                   <article key={record._id} style={{ border: "1px solid #ddd", padding: 12 }}>
-                    <p>Appointment: {getRecordAppointmentId(record)}</p>
+                    <h3>Consultation on {appointmentLabel}</h3>
+                    <p>Appointment date/time: {appointmentLabel}</p>
+                    <p style={{ color: "#666", fontSize: 12 }}>
+                      Appointment ID: {getRecordAppointmentId(record)}
+                    </p>
                     <h3>Diagnosis</h3>
                     <p style={{ whiteSpace: "pre-wrap" }}>{parsedRecord.diagnosis}</p>
                     <h3>Consultation Notes</h3>
