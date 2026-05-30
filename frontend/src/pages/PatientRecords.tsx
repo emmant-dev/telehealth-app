@@ -113,16 +113,18 @@ function PatientRecords() {
           const parsedRecord = parseMedicalNotes(record?.notes);
 
           return (
-            <article key={appointment._id} className={ui.card}>
-              <h2 className={ui.heading2}>{formatAppointmentDate(appointment.appointmentAt)}</h2>
-              <p className={ui.muted}>Doctor: {getAppointmentCounterparty(appointment, "patient")}</p>
-              <p className={ui.muted}>Status: {appointment.status}</p>
-              <h3 className={ui.heading3}>Diagnosis</h3>
-              <p className={ui.prewrap}>{parsedRecord.diagnosis}</p>
-              <h3 className={ui.heading3}>Consultation Notes</h3>
-              <p className={ui.prewrap}>{parsedRecord.notes}</p>
-              <h3 className={ui.heading3}>Prescription</h3>
-              <p className={ui.prewrap}>
+            <article key={appointment._id} className={`${ui.card} space-y-4`}>
+              <h2 className={`${ui.heading2} mb-4`}>{formatAppointmentDate(appointment.appointmentAt)}</h2>
+              <div className="space-y-2">
+                <p className={`${ui.muted} leading-relaxed`}>Doctor: {getAppointmentCounterparty(appointment, "patient")}</p>
+                <p className={`${ui.muted} leading-relaxed`}>Status: {appointment.status}</p>
+              </div>
+              <h3 className={`${ui.heading3} mt-5`}>Diagnosis</h3>
+              <p className={`${ui.prewrap} leading-relaxed`}>{parsedRecord.diagnosis}</p>
+              <h3 className={`${ui.heading3} mt-5`}>Consultation Notes</h3>
+              <p className={`${ui.prewrap} leading-relaxed`}>{parsedRecord.notes}</p>
+              <h3 className={`${ui.heading3} mt-5`}>Prescription</h3>
+              <p className={`${ui.prewrap} leading-relaxed`}>
                 {record?.prescription || "No prescription provided."}
               </p>
             </article>

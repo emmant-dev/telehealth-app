@@ -2,6 +2,7 @@ import { useState } from "react";
 import type { FormEvent } from "react";
 import toast from "react-hot-toast";
 import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
+import AuthLogo from "../components/AuthLogo";
 import { useAuthStore } from "../store/auth.store";
 import { ui } from "../utils/ui";
 
@@ -42,6 +43,7 @@ function Login() {
 
   return (
     <main className={ui.authPage}>
+      <AuthLogo />
       <h1 className={ui.heading1}>Login</h1>
       <form onSubmit={handleSubmit} className={ui.form}>
         <label className={ui.label}>

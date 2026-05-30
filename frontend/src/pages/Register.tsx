@@ -4,6 +4,7 @@ import toast from "react-hot-toast";
 import { Link, Navigate, useNavigate } from "react-router-dom";
 import { getApiErrorMessages, hasApiValidationMessages } from "../api/client";
 import { doctorApi } from "../api/doctor.api";
+import AuthLogo from "../components/AuthLogo";
 import { useAuthStore } from "../store/auth.store";
 import type { UserRole } from "../types";
 import { formatDoctorBio } from "../utils/display";
@@ -70,6 +71,7 @@ function Register() {
 
   return (
     <main className={ui.authPage}>
+      <AuthLogo />
       <h1 className={ui.heading1}>Register</h1>
       <form onSubmit={handleSubmit} className={ui.form} noValidate>
         <label className={ui.label}>
