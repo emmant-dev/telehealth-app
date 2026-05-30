@@ -170,7 +170,7 @@ function PatientProfile() {
             Address
             <input className={ui.input} value={form.address} onChange={(event) => updateField("address", event.target.value)} />
           </label>
-          <label className={ui.label}>
+          <label className={`${ui.label} md:col-span-2`}>
             Basic medical history
             <textarea
               className={ui.textarea}
@@ -178,7 +178,7 @@ function PatientProfile() {
               onChange={(event) => updateField("basicMedicalHistory", event.target.value)}
             />
           </label>
-          <button className={ui.button} type="submit" disabled={isSubmitting}>
+          <button className={`${ui.button} md:col-span-2 md:justify-self-start`} type="submit" disabled={isSubmitting}>
             {isSubmitting ? "Saving..." : "Save profile"}
           </button>
         </form>

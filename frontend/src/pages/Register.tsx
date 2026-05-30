@@ -2,6 +2,7 @@ import { useState } from "react";
 import type { FormEvent } from "react";
 import toast from "react-hot-toast";
 import { Link, Navigate, useNavigate } from "react-router-dom";
+import { getApiErrorMessages, hasApiValidationMessages } from "../api/client";
 import { doctorApi } from "../api/doctor.api";
 import { useAuthStore } from "../store/auth.store";
 import type { UserRole } from "../types";
@@ -18,7 +19,7 @@ function Register() {
   const [specialization, setSpecialization] = useState("");
   const [bio, setBio] = useState("");
   const [experience, setExperience] = useState("");
-  const [error, setError] = useState("");
+  const [errors, setErrors] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   if (isAuthenticated) {
@@ -27,7 +28,7 @@ function Register() {
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setError("");
+    setErrors([]);
     setIsSubmitting(true);
     const toastId = toast.loading("Creating account...");
 
@@ -53,9 +54,15 @@ function Register() {
         replace: true
       });
     } catch (caughtError) {
-      const message = caughtError instanceof Error ? caughtError.message : "Registration failed";
-      setError(message);
-      toast.error(message, { id: toastId });
+      const messages = getApiErrorMessages(caughtError, "Registration failed");
+      const message = messages.join("\n");
+      setErrors(messages);
+
+      if (hasApiValidationMessages(caughtError)) {
+        toast.dismiss(toastId);
+      } else {
+        toast.error(message, { id: toastId });
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -64,7 +71,7 @@ function Register() {
   return (
     <main className={ui.authPage}>
       <h1 className={ui.heading1}>Register</h1>
-      <form onSubmit={handleSubmit} className={ui.form}>
+      <form onSubmit={handleSubmit} className={ui.form} noValidate>
         <label className={ui.label}>
           Full name
           <input
@@ -89,7 +96,6 @@ function Register() {
           <input
             className={ui.input}
             required
-            minLength={8}
             type="password"
             value={password}
             onChange={(event) => setPassword(event.target.value)}
@@ -131,7 +137,16 @@ function Register() {
             </label>
           </>
         )}
-        {error && <p className={ui.alert} role="alert">{error}</p>}
+        {errors.length > 0 && (
+          <div className={ui.alert} role="alert">
+            <p>Please fix the following:</p>
+            <ul className="mt-2 list-inside list-disc">
+              {errors.map((message) => (
+                <li key={message}>{message}</li>
+              ))}
+            </ul>
+          </div>
+        )}
         <button className={ui.button} type="submit" disabled={isSubmitting}>
           {isSubmitting ? "Creating account..." : "Register"}
         </button>

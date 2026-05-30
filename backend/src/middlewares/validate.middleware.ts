@@ -18,7 +18,12 @@ export const validate =
       next();
     } catch (error) {
       if (error instanceof ZodError) {
-        next(new ApiError(400, "Validation failed", error.flatten()));
+        const validationErrors = error.issues.map((issue) => ({
+          field: issue.path.filter((segment) => segment !== "body").join("."),
+          message: issue.message
+        }));
+
+        next(new ApiError(400, "Validation failed", { errors: validationErrors }));
         return;
       }
 

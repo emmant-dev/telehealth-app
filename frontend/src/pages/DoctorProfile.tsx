@@ -165,7 +165,7 @@ function DoctorProfile() {
                 ))}
               </select>
             </label>
-            <label className={ui.label}>
+            <label className={`${ui.label} md:col-span-2`}>
               Bio / description
               <textarea
                 className={ui.textarea}
@@ -192,7 +192,7 @@ function DoctorProfile() {
                 onChange={(event) => setContactNumber(event.target.value)}
               />
             </label>
-            <button className={ui.button} type="submit" disabled={isSaving}>
+            <button className={`${ui.button} md:col-span-2 md:justify-self-start`} type="submit" disabled={isSaving}>
               {isSaving ? "Saving..." : profile && isDoctorProfileComplete(profile) ? "Update Profile" : "Complete Profile"}
             </button>
           </form>
