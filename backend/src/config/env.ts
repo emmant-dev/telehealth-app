@@ -16,5 +16,8 @@ export const env = {
   mongoUri: process.env.MONGODB_URI as string,
   jwtSecret: process.env.JWT_SECRET as string,
   jwtExpiresIn: process.env.JWT_EXPIRES_IN || "1d",
-  corsOrigin: process.env.CORS_ORIGIN || "http://localhost:5173"
+  corsOrigins: (process.env.CORS_ORIGIN || "http://localhost:5173")
+    .split(",")
+    .map((origin) => origin.trim())
+    .filter(Boolean)
 };

@@ -67,14 +67,30 @@ export const getApiErrorMessages = (error: unknown, fallback: string): string[] 
 export const hasApiValidationMessages = (error: unknown): error is ApiClientError =>
   error instanceof ApiClientError && error.validationMessages.length > 0;
 
+const configuredApiBaseUrl = import.meta.env.VITE_API_BASE_URL?.trim();
+const isLocalApiBaseUrl =
+  configuredApiBaseUrl?.includes("localhost") || configuredApiBaseUrl?.includes("127.0.0.1");
+const apiBaseUrl =
+  configuredApiBaseUrl && !(import.meta.env.PROD && isLocalApiBaseUrl)
+    ? configuredApiBaseUrl
+    : import.meta.env.DEV
+      ? "http://localhost:5000"
+      : undefined;
+
 export const apiClient = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL ?? "http://localhost:5000",
+  baseURL: apiBaseUrl,
   headers: {
     "Content-Type": "application/json"
   }
 });
 
 apiClient.interceptors.request.use((config) => {
+  if (!apiBaseUrl) {
+    throw new ApiClientError(
+      "Missing production API URL. Set VITE_API_BASE_URL to the deployed backend URL in the frontend Vercel project."
+    );
+  }
+
   const token = tokenStorage.get();
 
   if (token) {
