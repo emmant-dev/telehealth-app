@@ -7,6 +7,7 @@ import { doctorApi } from "../api/doctor.api";
 import type { DoctorLike, DoctorProfile } from "../types";
 import { getDoctorLikeId, getDoctorName, getDoctorUserId, parseDoctorBio } from "../utils/display";
 import { emitRefreshEvent } from "../utils/refreshEvents";
+import { ui } from "../utils/ui";
 
 interface LocationState {
   doctor?: DoctorLike | DoctorProfile | string | null;
@@ -119,42 +120,43 @@ function PatientDoctorDetail() {
   };
 
   return (
-    <main style={{ padding: 24 }}>
+    <main className={ui.page}>
       <p>
-        <Link to="/patient/doctors">Back to doctors</Link>
+        <Link className={ui.linkButton} to="/patient/doctors">Back to doctors</Link>
       </p>
-      <h1>Doctor Details</h1>
-      {error && <p role="alert">{error}</p>}
-      {isLoading && <p>Loading doctor...</p>}
-      {!isLoading && !doctor && !error && <p>Doctor information unavailable for this appointment</p>}
+      <h1 className={ui.heading1}>Doctor Details</h1>
+      {error && <p className={ui.alert} role="alert">{error}</p>}
+      {isLoading && <p className={ui.muted}>Loading doctor...</p>}
+      {!isLoading && !doctor && !error && <p className={ui.status}>Doctor information unavailable for this appointment</p>}
 
       {doctor && (
         <>
-          <section>
-            <h2>{getDoctorName(doctor)}</h2>
-            <p>Specialization: {doctor.specialization || "Specialization unavailable"}</p>
-            <p>Bio: {parseDoctorBio(doctor.bio).bio || "Not provided"}</p>
-            <p>Experience: {parseDoctorBio(doctor.bio).experience || "Not provided"}</p>
-            <p>Contact: {doctor.contactNumber || "Not provided"}</p>
+          <section className={ui.section}>
+            <h2 className={ui.heading2}>{getDoctorName(doctor)}</h2>
+            <p className={ui.muted}>Specialization: {doctor.specialization || "Specialization unavailable"}</p>
+            <p className={ui.muted}>Bio: {parseDoctorBio(doctor.bio).bio || "Not provided"}</p>
+            <p className={ui.muted}>Experience: {parseDoctorBio(doctor.bio).experience || "Not provided"}</p>
+            <p className={ui.muted}>Contact: {doctor.contactNumber || "Not provided"}</p>
           </section>
 
-          <section>
-            <h2>Book Appointment</h2>
-            <form onSubmit={handleBook} style={{ display: "grid", gap: 12, maxWidth: 480 }}>
-              <label>
+          <section className={ui.section}>
+            <h2 className={ui.heading2}>Book Appointment</h2>
+            <form onSubmit={handleBook} className="grid w-full gap-4 sm:max-w-[480px]">
+              <label className={ui.label}>
                 Date and time
                 <input
+                  className={ui.input}
                   required
                   type="datetime-local"
                   value={appointmentAt}
                   onChange={(event) => setAppointmentAt(event.target.value)}
                 />
               </label>
-              <label>
+              <label className={ui.label}>
                 Reason
-                <textarea value={reason} onChange={(event) => setReason(event.target.value)} />
+                <textarea className={ui.textarea} value={reason} onChange={(event) => setReason(event.target.value)} />
               </label>
-              <button type="submit" disabled={isSubmitting}>
+              <button className={ui.button} type="submit" disabled={isSubmitting}>
                 {isSubmitting ? "Booking..." : "Book appointment"}
               </button>
             </form>

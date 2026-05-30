@@ -9,6 +9,7 @@ import {
   parseMedicalNotes
 } from "../utils/display";
 import { subscribeToRefreshEvents } from "../utils/refreshEvents";
+import { ui } from "../utils/ui";
 
 interface HistoryEntry {
   appointment: Appointment;
@@ -101,27 +102,27 @@ function PatientRecords() {
   }, [appointments, loadedAt, records]);
 
   return (
-    <main style={{ padding: 24 }}>
-      <h1>Medical History</h1>
-      {error && <p role="alert">{error}</p>}
-      {isLoading && <p>Loading medical history...</p>}
-      {!isLoading && historyEntries.length === 0 && <p>No medical history available.</p>}
+    <main className={ui.page}>
+      <h1 className={ui.heading1}>Medical History</h1>
+      {error && <p className={ui.alert} role="alert">{error}</p>}
+      {isLoading && <p className={ui.muted}>Loading medical history...</p>}
+      {!isLoading && historyEntries.length === 0 && <p className={ui.status}>No medical history available.</p>}
 
-      <section style={{ display: "grid", gap: 12 }}>
+      <section className={`${ui.section} ${ui.grid}`}>
         {historyEntries.map(({ appointment, record }) => {
           const parsedRecord = parseMedicalNotes(record?.notes);
 
           return (
-            <article key={appointment._id} style={{ border: "1px solid #ddd", padding: 12 }}>
-              <h2>{formatAppointmentDate(appointment.appointmentAt)}</h2>
-              <p>Doctor: {getAppointmentCounterparty(appointment, "patient")}</p>
-              <p>Status: {appointment.status}</p>
-              <h3>Diagnosis</h3>
-              <p style={{ whiteSpace: "pre-wrap" }}>{parsedRecord.diagnosis}</p>
-              <h3>Consultation Notes</h3>
-              <p style={{ whiteSpace: "pre-wrap" }}>{parsedRecord.notes}</p>
-              <h3>Prescription</h3>
-              <p style={{ whiteSpace: "pre-wrap" }}>
+            <article key={appointment._id} className={ui.card}>
+              <h2 className={ui.heading2}>{formatAppointmentDate(appointment.appointmentAt)}</h2>
+              <p className={ui.muted}>Doctor: {getAppointmentCounterparty(appointment, "patient")}</p>
+              <p className={ui.muted}>Status: {appointment.status}</p>
+              <h3 className={ui.heading3}>Diagnosis</h3>
+              <p className={ui.prewrap}>{parsedRecord.diagnosis}</p>
+              <h3 className={ui.heading3}>Consultation Notes</h3>
+              <p className={ui.prewrap}>{parsedRecord.notes}</p>
+              <h3 className={ui.heading3}>Prescription</h3>
+              <p className={ui.prewrap}>
                 {record?.prescription || "No prescription provided."}
               </p>
             </article>

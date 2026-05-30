@@ -31,31 +31,16 @@ const appToaster = (
     {(activeToast) => (
       <ToastBar
         toast={activeToast}
-        style={{
-          border: "1px solid #ddd",
-          borderRadius: 6,
-          boxShadow: "0 8px 24px rgba(0, 0, 0, 0.14)",
-          maxWidth: "min(420px, calc(100vw - 32px))",
-          padding: "10px 12px"
-        }}
       >
         {({ icon, message }) => (
-          <div style={{ alignItems: "flex-start", display: "flex", gap: 10, width: "100%" }}>
-            <div style={{ flexShrink: 0 }}>{icon}</div>
-            <div style={{ flex: 1, minWidth: 0 }}>{message}</div>
+          <div className="flex w-[calc(100vw-32px)] items-start gap-2.5 rounded-[18px] border border-[#DDEEDD] bg-white p-3.5 text-[#111111] shadow-[0_18px_45px_rgba(12,154,61,0.14)] sm:w-[420px]">
+            <div className="shrink-0">{icon}</div>
+            <div className="min-w-0 flex-1">{message}</div>
             <button
               type="button"
               aria-label="Dismiss notification"
               onClick={() => toast.dismiss(activeToast.id)}
-              style={{
-                background: "transparent",
-                border: 0,
-                cursor: "pointer",
-                flexShrink: 0,
-                fontSize: 18,
-                lineHeight: 1,
-                padding: "0 2px"
-              }}
+              className="min-h-0 shrink-0 cursor-pointer border-0 bg-transparent px-0.5 text-lg leading-none text-[#0C9A3D] shadow-none hover:text-[#14B84A]"
             >
               ×
             </button>
@@ -77,7 +62,7 @@ function App() {
     return (
       <>
         {appToaster}
-        <main style={{ padding: 24 }}>Loading...</main>
+        <main className="mx-auto w-full px-4 py-6 text-[#111111] sm:px-6 sm:py-8 lg:w-[1120px] lg:px-0 lg:py-11">Loading...</main>
       </>
     );
   }

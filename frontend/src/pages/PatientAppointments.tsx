@@ -13,6 +13,7 @@ import {
   getEmbeddedDoctor
 } from "../utils/display";
 import { emitRefreshEvent, subscribeToRefreshEvents } from "../utils/refreshEvents";
+import { ui } from "../utils/ui";
 
 function PatientAppointments() {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
@@ -121,12 +122,12 @@ function PatientAppointments() {
   };
 
   return (
-    <main style={{ padding: 24 }}>
-      <h1>My Appointments</h1>
-      {error && <p role="alert">{error}</p>}
-      {isLoading && <p>Loading appointments...</p>}
-      {!isLoading && appointments.length === 0 && <p>No appointments yet.</p>}
-      <div style={{ display: "grid", gap: 12 }}>
+    <main className={ui.page}>
+      <h1 className={ui.heading1}>My Appointments</h1>
+      {error && <p className={ui.alert} role="alert">{error}</p>}
+      {isLoading && <p className={ui.muted}>Loading appointments...</p>}
+      {!isLoading && appointments.length === 0 && <p className={ui.status}>No appointments yet.</p>}
+      <div className={ui.grid}>
         {appointments.map((appointment) => {
           const consultationLink = getConsultationLink(appointment._id);
           const embeddedDoctor = getEmbeddedDoctor(appointment);
@@ -135,39 +136,41 @@ function PatientAppointments() {
             appointment.status === "pending" || appointment.status === "confirmed";
 
           return (
-            <article key={appointment._id} style={{ border: "1px solid #ddd", padding: 12 }}>
-              <h2>{formatAppointmentDate(appointment.appointmentAt)}</h2>
-              <p>Doctor: {getAppointmentCounterparty(appointment, "patient")}</p>
+            <article key={appointment._id} className={ui.card}>
+              <h2 className={ui.heading2}>{formatAppointmentDate(appointment.appointmentAt)}</h2>
+              <p className={ui.muted}>Doctor: {getAppointmentCounterparty(appointment, "patient")}</p>
               {doctorId ? (
                 <p>
-                  <Link to={`/patient/doctors/${doctorId}`} state={{ doctor: embeddedDoctor }}>
+                  <Link className={ui.linkButton} to={`/patient/doctors/${doctorId}`} state={{ doctor: embeddedDoctor }}>
                     View Details
                   </Link>
                 </p>
               ) : (
-                <p>Doctor information unavailable for this appointment</p>
+                <p className={ui.muted}>Doctor information unavailable for this appointment</p>
               )}
-              <p>Status: {appointment.status}</p>
-              {appointment.reason && <p>Reason: {appointment.reason}</p>}
+              <p className={ui.muted}>Status: {appointment.status}</p>
+              {appointment.reason && <p className={ui.muted}>Reason: {appointment.reason}</p>}
 
-              <div>
-                <a href={consultationLink} target="_blank" rel="noreferrer">
+              <div className="mt-3">
+                <a className={ui.button} href={consultationLink} target="_blank" rel="noreferrer">
                   Join Consultation
                 </a>
               </div>
 
-              <div style={{ display: "grid", gap: 8, marginTop: 12, maxWidth: 480 }}>
+              <div className="mt-3 grid w-full gap-2 sm:max-w-[480px]">
                 <button
+                  className={ui.button}
                   type="button"
                   disabled={!isMutable || mutatingAppointmentId === appointment._id}
                   onClick={() => void handleCancel(appointment._id)}
                 >
                   Cancel Appointment
                 </button>
-                <form onSubmit={(event) => void handleReschedule(event, appointment._id)}>
-                  <label>
+                <form className={ui.form} onSubmit={(event) => void handleReschedule(event, appointment._id)}>
+                  <label className={ui.label}>
                     New date and time
                     <input
+                      className={ui.input}
                       disabled={!isMutable}
                       type="datetime-local"
                       value={rescheduleValues[appointment._id] || ""}
@@ -180,6 +183,7 @@ function PatientAppointments() {
                     />
                   </label>
                   <button
+                    className={ui.button}
                     type="submit"
                     disabled={!isMutable || mutatingAppointmentId === appointment._id}
                   >

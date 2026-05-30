@@ -18,6 +18,7 @@ import {
   parseMedicalNotes
 } from "../utils/display";
 import { emitRefreshEvent } from "../utils/refreshEvents";
+import { ui } from "../utils/ui";
 
 const getPatientInfo = (appointment: Appointment): UserReference | null => {
   return typeof appointment.patient === "string" ? null : appointment.patient;
@@ -242,49 +243,50 @@ function DoctorAppointmentDetail() {
   }, [doctorAppointments, patientHistory]);
 
   return (
-    <main style={{ padding: 24 }}>
+    <main className={ui.page}>
       <p>
-        <Link to="/doctor/dashboard">Back to dashboard</Link>
+        <Link className={ui.linkButton} to="/doctor/dashboard">Back to dashboard</Link>
       </p>
-      <h1>Appointment Detail</h1>
-      {(error || appointmentRefreshError) && <p role="alert">{error || appointmentRefreshError}</p>}
-      {(isLoading || isLoadingAppointments) && <p>Loading appointment...</p>}
+      <h1 className={ui.heading1}>Appointment Detail</h1>
+      {(error || appointmentRefreshError) && <p className={ui.alert} role="alert">{error || appointmentRefreshError}</p>}
+      {(isLoading || isLoadingAppointments) && <p className={ui.muted}>Loading appointment...</p>}
 
       {appointment && (
         <>
-          <section>
-            <h2>Appointment</h2>
-            <p>Date/time: {formatAppointmentDate(appointment.appointmentAt)}</p>
-            <p>Status: {appointment.status}</p>
-            {appointment.reason && <p>Reason: {appointment.reason}</p>}
+          <section className={ui.section}>
+            <h2 className={ui.heading2}>Appointment</h2>
+            <p className={ui.muted}>Date/time: {formatAppointmentDate(appointment.appointmentAt)}</p>
+            <p className={ui.muted}>Status: {appointment.status}</p>
+            {appointment.reason && <p className={ui.muted}>Reason: {appointment.reason}</p>}
             <p>
-              <a href={jitsiLink} target="_blank" rel="noreferrer">
+              <a className={ui.button} href={jitsiLink} target="_blank" rel="noreferrer">
                 Join Consultation
               </a>
             </p>
           </section>
 
-          <section>
-            <h2>Patient Profile</h2>
-            <p>Name: {getUserLabel(appointment.patient)}</p>
+          <section className={ui.section}>
+            <h2 className={ui.heading2}>Patient Profile</h2>
+            <p className={ui.muted}>Name: {getUserLabel(appointment.patient)}</p>
             {patientInfo ? (
               <>
-                <p>Email: {patientInfo.email || "Not available"}</p>
-                <p>Age: {calculateAge(patientInfo.birthday)}</p>
-                <p>Birthday: {patientInfo.birthday || "Not available"}</p>
-                <p>Height: {patientInfo.heightCm ? `${patientInfo.heightCm} cm` : "Not available"}</p>
-                <p>Weight: {patientInfo.weightKg ? `${patientInfo.weightKg} kg` : "Not available"}</p>
-                <p>Medical history: {patientInfo.basicMedicalHistory || "Not available"}</p>
+                <p className={ui.muted}>Email: {patientInfo.email || "Not available"}</p>
+                <p className={ui.muted}>Age: {calculateAge(patientInfo.birthday)}</p>
+                <p className={ui.muted}>Birthday: {patientInfo.birthday || "Not available"}</p>
+                <p className={ui.muted}>Height: {patientInfo.heightCm ? `${patientInfo.heightCm} cm` : "Not available"}</p>
+                <p className={ui.muted}>Weight: {patientInfo.weightKg ? `${patientInfo.weightKg} kg` : "Not available"}</p>
+                <p className={ui.muted}>Medical history: {patientInfo.basicMedicalHistory || "Not available"}</p>
               </>
             ) : (
-              <p>Basic patient profile data is not available from this appointment response.</p>
+              <p className={ui.muted}>Basic patient profile data is not available from this appointment response.</p>
             )}
           </section>
 
-          <section>
-            <h2>Status Management</h2>
-            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+          <section className={ui.section}>
+            <h2 className={ui.heading2}>Status Management</h2>
+            <div className={ui.flexWrap}>
               <button
+                className={ui.button}
                 type="button"
                 disabled={isUpdatingStatus || appointment.status !== "pending"}
                 onClick={() => void updateStatus("confirmed")}
@@ -292,6 +294,7 @@ function DoctorAppointmentDetail() {
                 Confirm Appointment
               </button>
               <button
+                className={ui.button}
                 type="button"
                 disabled={isUpdatingStatus || appointment.status !== "confirmed"}
                 onClick={() => void updateStatus("completed")}
@@ -299,6 +302,7 @@ function DoctorAppointmentDetail() {
                 Complete Appointment
               </button>
               <button
+                className={ui.button}
                 type="button"
                 disabled={isUpdatingStatus || appointment.status === "completed"}
                 onClick={() => void updateStatus("cancelled")}
@@ -308,51 +312,52 @@ function DoctorAppointmentDetail() {
             </div>
           </section>
 
-          <section>
-            <h2>Consultation Notes</h2>
-            <article style={{ border: "1px solid #ddd", padding: 12, marginBottom: 12 }}>
-              <h3>Saved Medical Record</h3>
+          <section className={ui.section}>
+            <h2 className={ui.heading2}>Consultation Notes</h2>
+            <article className={`${ui.card} mb-3`}>
+              <h3 className={ui.heading3}>Saved Medical Record</h3>
               {medicalRecord ? (
                 <>
-                  <h4>Diagnosis</h4>
-                  <p style={{ whiteSpace: "pre-wrap" }}>{parsedSavedRecord.diagnosis}</p>
-                  <h4>Consultation Notes</h4>
-                  <p style={{ whiteSpace: "pre-wrap" }}>{parsedSavedRecord.notes}</p>
-                  <h4>Prescription</h4>
-                  <p style={{ whiteSpace: "pre-wrap" }}>
+                  <h4 className={ui.heading3}>Diagnosis</h4>
+                  <p className={ui.prewrap}>{parsedSavedRecord.diagnosis}</p>
+                  <h4 className={ui.heading3}>Consultation Notes</h4>
+                  <p className={ui.prewrap}>{parsedSavedRecord.notes}</p>
+                  <h4 className={ui.heading3}>Prescription</h4>
+                  <p className={ui.prewrap}>
                     {medicalRecord.prescription || "No prescription provided."}
                   </p>
                 </>
               ) : (
-                <p>No consultation notes saved for this appointment yet.</p>
+                <p className={ui.muted}>No consultation notes saved for this appointment yet.</p>
               )}
             </article>
-            <form onSubmit={saveNotes} style={{ display: "grid", gap: 12, maxWidth: 640 }}>
-              <label>
+            <form onSubmit={saveNotes} className={ui.formWide}>
+              <label className={ui.label}>
                 Diagnosis
-                <textarea value={diagnosis} onChange={(event) => setDiagnosis(event.target.value)} />
+                <textarea className={ui.textarea} value={diagnosis} onChange={(event) => setDiagnosis(event.target.value)} />
               </label>
-              <label>
+              <label className={ui.label}>
                 Consultation notes
-                <textarea value={notes} onChange={(event) => setNotes(event.target.value)} />
+                <textarea className={ui.textarea} value={notes} onChange={(event) => setNotes(event.target.value)} />
               </label>
-              <label>
+              <label className={ui.label}>
                 Prescription
                 <textarea
+                  className={ui.textarea}
                   value={prescription}
                   onChange={(event) => setPrescription(event.target.value)}
                 />
               </label>
-              <button type="submit" disabled={isSavingNotes}>
+              <button className={ui.button} type="submit" disabled={isSavingNotes}>
                 {isSavingNotes ? "Saving..." : medicalRecord ? "Update Notes" : "Save Notes"}
               </button>
             </form>
           </section>
 
-          <section>
-            <h2>Patient Medical History</h2>
-            {sortedPatientHistory.length === 0 && <p>No medical history available.</p>}
-            <div style={{ display: "grid", gap: 12 }}>
+          <section className={ui.section}>
+            <h2 className={ui.heading2}>Patient Medical History</h2>
+            {sortedPatientHistory.length === 0 && <p className={ui.status}>No medical history available.</p>}
+            <div className={ui.grid}>
               {sortedPatientHistory.map((record) => {
                 const parsedRecord = parseMedicalNotes(record.notes);
                 const historyAppointment =
@@ -364,18 +369,18 @@ function DoctorAppointmentDetail() {
                   : "Appointment date unavailable";
 
                 return (
-                  <article key={record._id} style={{ border: "1px solid #ddd", padding: 12 }}>
-                    <h3>Consultation on {appointmentLabel}</h3>
-                    <p>Appointment date/time: {appointmentLabel}</p>
-                    <p style={{ color: "#666", fontSize: 12 }}>
+                  <article key={record._id} className={ui.card}>
+                    <h3 className={ui.heading3}>Consultation on {appointmentLabel}</h3>
+                    <p className={ui.muted}>Appointment date/time: {appointmentLabel}</p>
+                    <p className={ui.smallMuted}>
                       Appointment ID: {getRecordAppointmentId(record)}
                     </p>
-                    <h3>Diagnosis</h3>
-                    <p style={{ whiteSpace: "pre-wrap" }}>{parsedRecord.diagnosis}</p>
-                    <h3>Consultation Notes</h3>
-                    <p style={{ whiteSpace: "pre-wrap" }}>{parsedRecord.notes}</p>
-                    <h3>Prescription</h3>
-                    <p style={{ whiteSpace: "pre-wrap" }}>
+                    <h3 className={ui.heading3}>Diagnosis</h3>
+                    <p className={ui.prewrap}>{parsedRecord.diagnosis}</p>
+                    <h3 className={ui.heading3}>Consultation Notes</h3>
+                    <p className={ui.prewrap}>{parsedRecord.notes}</p>
+                    <h3 className={ui.heading3}>Prescription</h3>
+                    <p className={ui.prewrap}>
                       {record.prescription || "No prescription provided."}
                     </p>
                   </article>

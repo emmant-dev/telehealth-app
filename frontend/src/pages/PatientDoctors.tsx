@@ -7,6 +7,7 @@ import { geminiApi } from "../api/gemini.api";
 import type { DoctorRecommendation } from "../api/gemini.api";
 import type { DoctorProfile } from "../types";
 import { getDoctorUserId, parseDoctorBio } from "../utils/display";
+import { ui } from "../utils/ui";
 
 function PatientDoctors() {
   const [doctors, setDoctors] = useState<DoctorProfile[]>([]);
@@ -93,17 +94,17 @@ function PatientDoctors() {
     const preview = parsedBio.bio || "Bio not provided";
 
     return (
-      <article key={doctor._id} style={{ border: "1px solid #ddd", padding: 12 }}>
-        <h3>{doctor.name || "Doctor name not provided"}</h3>
-        <p>{doctor.specialization || "Specialization unavailable"}</p>
-        <p>{preview.slice(0, 160)}{preview.length > 160 ? "..." : ""}</p>
-        <p>Experience: {parsedBio.experience || "Not provided"}</p>
+      <article key={doctor._id} className={ui.card}>
+        <h3 className={ui.heading3}>{doctor.name || "Doctor name not provided"}</h3>
+        <p className={ui.muted}>{doctor.specialization || "Specialization unavailable"}</p>
+        <p className={ui.muted}>{preview.slice(0, 160)}{preview.length > 160 ? "..." : ""}</p>
+        <p className={ui.muted}>Experience: {parsedBio.experience || "Not provided"}</p>
         {getDoctorUserId(doctor) ? (
-          <Link to={`/patient/doctors/${getDoctorUserId(doctor)}`} state={{ doctor }}>
+          <Link className={ui.linkButton} to={`/patient/doctors/${getDoctorUserId(doctor)}`} state={{ doctor }}>
             View details and book
           </Link>
         ) : (
-          <p>Doctor information unavailable for booking</p>
+          <p className={ui.muted}>Doctor information unavailable for booking</p>
         )}
       </article>
     );
@@ -139,30 +140,31 @@ function PatientDoctors() {
   };
 
   return (
-    <main style={{ padding: 24 }}>
-      <h1>Find a Doctor</h1>
-      {error && <p role="alert">{error}</p>}
+    <main className={ui.page}>
+      <h1 className={ui.heading1}>Find a Doctor</h1>
+      {error && <p className={ui.alert} role="alert">{error}</p>}
 
-      <section style={{ display: "grid", gap: 12, marginBottom: 24, maxWidth: 640 }}>
-        <h2>AI Doctor Recommendation</h2>
-        <form onSubmit={handleRecommendDoctors} style={{ display: "grid", gap: 12 }}>
-          <label>
+      <section className={`${ui.section} grid w-full gap-3 sm:max-w-[640px]`}>
+        <h2 className={ui.heading2}>AI Doctor Recommendation</h2>
+        <form onSubmit={handleRecommendDoctors} className={ui.form}>
+          <label className={ui.label}>
             Symptoms or health concerns
             <textarea
+              className={ui.textarea}
               rows={4}
               value={symptoms}
               onChange={(event) => setSymptoms(event.target.value)}
             />
           </label>
-          <button type="submit" disabled={isRecommending}>
+          <button className={ui.button} type="submit" disabled={isRecommending}>
             {isRecommending ? "Getting Recommendations..." : "Get Doctor Recommendations"}
           </button>
         </form>
         {recommendation && (
-          <div style={{ border: "1px solid #ddd", padding: 12 }}>
-            <p>Recommended specialization: {recommendation.specialization}</p>
-            <p>Severity: {recommendation.severity}</p>
-            <p>
+          <div className={ui.card}>
+            <p className={ui.muted}>Recommended specialization: {recommendation.specialization}</p>
+            <p className={ui.muted}>Severity: {recommendation.severity}</p>
+            <p className={ui.muted}>
               Keywords:{" "}
               {recommendation.keywords.length > 0
                 ? recommendation.keywords.join(", ")
@@ -173,22 +175,23 @@ function PatientDoctors() {
       </section>
 
       {recommendation && (
-        <section>
-          <h2>Recommended Doctors</h2>
+        <section className={ui.section}>
+          <h2 className={ui.heading2}>Recommended Doctors</h2>
           {!hasRecommendationMatches && (
-            <p>No exact specialization match found. Showing all doctors.</p>
+            <p className={ui.muted}>No exact specialization match found. Showing all doctors.</p>
           )}
-          {recommendedDoctors.length === 0 && <p>No doctors available.</p>}
-          <div style={{ display: "grid", gap: 12 }}>
+          {recommendedDoctors.length === 0 && <p className={ui.status}>No doctors available.</p>}
+          <div className={ui.grid}>
             {recommendedDoctors.map((doctor) => renderDoctorCard(doctor))}
           </div>
         </section>
       )}
 
-      <section style={{ display: "grid", gap: 12, maxWidth: 520 }}>
-        <label>
+      <section className={`${ui.section} grid w-full gap-3 sm:max-w-[520px]`}>
+        <label className={ui.label}>
           Search by name or specialization
           <input
+            className={ui.input}
             value={searchTerm}
             onBlur={() => {
               if (searchTerm.trim()) {
@@ -198,9 +201,10 @@ function PatientDoctors() {
             onChange={(event) => setSearchTerm(event.target.value)}
           />
         </label>
-        <label>
+        <label className={ui.label}>
           Filter by specialization
           <select
+            className={ui.input}
             value={specialization}
             onChange={(event) => {
               setSpecialization(event.target.value);
@@ -220,11 +224,11 @@ function PatientDoctors() {
         </label>
       </section>
 
-      <section>
-        <h2>Doctors</h2>
-        {isLoading && <p>Loading doctors...</p>}
-        {!isLoading && filteredDoctors.length === 0 && <p>No doctors match your search.</p>}
-        <div style={{ display: "grid", gap: 12 }}>
+      <section className={ui.section}>
+        <h2 className={ui.heading2}>Doctors</h2>
+        {isLoading && <p className={ui.muted}>Loading doctors...</p>}
+        {!isLoading && filteredDoctors.length === 0 && <p className={ui.status}>No doctors match your search.</p>}
+        <div className={ui.grid}>
           {filteredDoctors.map((doctor) => renderDoctorCard(doctor))}
         </div>
       </section>
