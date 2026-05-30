@@ -33,7 +33,7 @@ const appToaster = (
         toast={activeToast}
       >
         {({ icon, message }) => (
-          <div className="flex w-[calc(100vw-32px)] items-start gap-2.5 rounded-[18px] border border-[#DDEEDD] bg-white p-3.5 text-[#111111] shadow-[0_18px_45px_rgba(12,154,61,0.14)] sm:w-[420px]">
+          <div className="flex w-[calc(100vw-32px)] items-start gap-2.5 rounded-[18px] border border-[#DDEEDD] bg-white p-3.5 text-[#111111] shadow-[0_18px_45px_rgba(12,154,61,0.14)] sm:w-[420px] md:w-[460px]">
             <div className="shrink-0">{icon}</div>
             <div className="min-w-0 flex-1">{message}</div>
             <button
@@ -62,7 +62,7 @@ function App() {
     return (
       <>
         {appToaster}
-        <main className="mx-auto w-full px-4 py-6 text-[#111111] sm:px-6 sm:py-8 lg:w-[1120px] lg:px-0 lg:py-11">Loading...</main>
+        <main className="mx-auto w-full px-4 py-6 text-[#111111] sm:px-6 sm:py-8 md:max-w-[920px] md:py-10 lg:max-w-[1120px] lg:px-0 lg:py-11">Loading...</main>
       </>
     );
   }

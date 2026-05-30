@@ -253,64 +253,66 @@ function DoctorAppointmentDetail() {
 
       {appointment && (
         <>
-          <section className={ui.section}>
-            <h2 className={ui.heading2}>Appointment</h2>
-            <p className={ui.muted}>Date/time: {formatAppointmentDate(appointment.appointmentAt)}</p>
-            <p className={ui.muted}>Status: {appointment.status}</p>
-            {appointment.reason && <p className={ui.muted}>Reason: {appointment.reason}</p>}
-            <p>
-              <a className={ui.button} href={jitsiLink} target="_blank" rel="noreferrer">
-                Join Consultation
-              </a>
-            </p>
-          </section>
+          <div className="grid gap-5 md:grid-cols-2 md:gap-6 lg:grid-cols-3">
+            <section className={`${ui.section} !mt-0`}>
+              <h2 className={ui.heading2}>Appointment</h2>
+              <p className={ui.muted}>Date/time: {formatAppointmentDate(appointment.appointmentAt)}</p>
+              <p className={ui.muted}>Status: {appointment.status}</p>
+              {appointment.reason && <p className={ui.muted}>Reason: {appointment.reason}</p>}
+              <p>
+                <a className={ui.button} href={jitsiLink} target="_blank" rel="noreferrer">
+                  Join Consultation
+                </a>
+              </p>
+            </section>
 
-          <section className={ui.section}>
-            <h2 className={ui.heading2}>Patient Profile</h2>
-            <p className={ui.muted}>Name: {getUserLabel(appointment.patient)}</p>
-            {patientInfo ? (
-              <>
-                <p className={ui.muted}>Email: {patientInfo.email || "Not available"}</p>
-                <p className={ui.muted}>Age: {calculateAge(patientInfo.birthday)}</p>
-                <p className={ui.muted}>Birthday: {patientInfo.birthday || "Not available"}</p>
-                <p className={ui.muted}>Height: {patientInfo.heightCm ? `${patientInfo.heightCm} cm` : "Not available"}</p>
-                <p className={ui.muted}>Weight: {patientInfo.weightKg ? `${patientInfo.weightKg} kg` : "Not available"}</p>
-                <p className={ui.muted}>Medical history: {patientInfo.basicMedicalHistory || "Not available"}</p>
-              </>
-            ) : (
-              <p className={ui.muted}>Basic patient profile data is not available from this appointment response.</p>
-            )}
-          </section>
+            <section className={`${ui.section} !mt-0`}>
+              <h2 className={ui.heading2}>Patient Profile</h2>
+              <p className={ui.muted}>Name: {getUserLabel(appointment.patient)}</p>
+              {patientInfo ? (
+                <>
+                  <p className={ui.muted}>Email: {patientInfo.email || "Not available"}</p>
+                  <p className={ui.muted}>Age: {calculateAge(patientInfo.birthday)}</p>
+                  <p className={ui.muted}>Birthday: {patientInfo.birthday || "Not available"}</p>
+                  <p className={ui.muted}>Height: {patientInfo.heightCm ? `${patientInfo.heightCm} cm` : "Not available"}</p>
+                  <p className={ui.muted}>Weight: {patientInfo.weightKg ? `${patientInfo.weightKg} kg` : "Not available"}</p>
+                  <p className={ui.muted}>Medical history: {patientInfo.basicMedicalHistory || "Not available"}</p>
+                </>
+              ) : (
+                <p className={ui.muted}>Basic patient profile data is not available from this appointment response.</p>
+              )}
+            </section>
 
-          <section className={ui.section}>
-            <h2 className={ui.heading2}>Status Management</h2>
-            <div className={ui.flexWrap}>
-              <button
-                className={ui.button}
-                type="button"
-                disabled={isUpdatingStatus || appointment.status !== "pending"}
-                onClick={() => void updateStatus("confirmed")}
-              >
-                Confirm Appointment
-              </button>
-              <button
-                className={ui.button}
-                type="button"
-                disabled={isUpdatingStatus || appointment.status !== "confirmed"}
-                onClick={() => void updateStatus("completed")}
-              >
-                Complete Appointment
-              </button>
-              <button
-                className={ui.button}
-                type="button"
-                disabled={isUpdatingStatus || appointment.status === "completed"}
-                onClick={() => void updateStatus("cancelled")}
-              >
-                Cancel Appointment
-              </button>
-            </div>
-          </section>
+            <section className={`${ui.section} !mt-0 md:col-span-2 lg:col-span-1`}>
+              <h2 className={ui.heading2}>Status Management</h2>
+              <div className={ui.flexWrap}>
+                <button
+                  className={ui.button}
+                  type="button"
+                  disabled={isUpdatingStatus || appointment.status !== "pending"}
+                  onClick={() => void updateStatus("confirmed")}
+                >
+                  Confirm Appointment
+                </button>
+                <button
+                  className={ui.button}
+                  type="button"
+                  disabled={isUpdatingStatus || appointment.status !== "confirmed"}
+                  onClick={() => void updateStatus("completed")}
+                >
+                  Complete Appointment
+                </button>
+                <button
+                  className={ui.button}
+                  type="button"
+                  disabled={isUpdatingStatus || appointment.status === "completed"}
+                  onClick={() => void updateStatus("cancelled")}
+                >
+                  Cancel Appointment
+                </button>
+              </div>
+            </section>
+          </div>
 
           <section className={ui.section}>
             <h2 className={ui.heading2}>Consultation Notes</h2>
@@ -332,15 +334,15 @@ function DoctorAppointmentDetail() {
               )}
             </article>
             <form onSubmit={saveNotes} className={ui.formWide}>
-              <label className={ui.label}>
+              <label className={`${ui.label} md:col-span-2`}>
                 Diagnosis
                 <textarea className={ui.textarea} value={diagnosis} onChange={(event) => setDiagnosis(event.target.value)} />
               </label>
-              <label className={ui.label}>
+              <label className={`${ui.label} md:col-span-2`}>
                 Consultation notes
                 <textarea className={ui.textarea} value={notes} onChange={(event) => setNotes(event.target.value)} />
               </label>
-              <label className={ui.label}>
+              <label className={`${ui.label} md:col-span-2`}>
                 Prescription
                 <textarea
                   className={ui.textarea}
@@ -348,7 +350,7 @@ function DoctorAppointmentDetail() {
                   onChange={(event) => setPrescription(event.target.value)}
                 />
               </label>
-              <button className={ui.button} type="submit" disabled={isSavingNotes}>
+              <button className={`${ui.button} md:col-span-2 md:justify-self-start`} type="submit" disabled={isSavingNotes}>
                 {isSavingNotes ? "Saving..." : medicalRecord ? "Update Notes" : "Save Notes"}
               </button>
             </form>

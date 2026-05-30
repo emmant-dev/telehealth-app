@@ -144,7 +144,7 @@ function PatientDoctors() {
       <h1 className={ui.heading1}>Find a Doctor</h1>
       {error && <p className={ui.alert} role="alert">{error}</p>}
 
-      <section className={`${ui.section} grid w-full gap-3 sm:max-w-[640px]`}>
+      <section className={`${ui.section} grid w-full gap-3 md:max-w-[760px] lg:max-w-[860px]`}>
         <h2 className={ui.heading2}>AI Doctor Recommendation</h2>
         <form onSubmit={handleRecommendDoctors} className={ui.form}>
           <label className={ui.label}>
@@ -187,7 +187,7 @@ function PatientDoctors() {
         </section>
       )}
 
-      <section className={`${ui.section} grid w-full gap-3 sm:max-w-[520px]`}>
+      <section className={`${ui.section} grid w-full gap-3 md:grid-cols-2 lg:max-w-[860px]`}>
         <label className={ui.label}>
           Search by name or specialization
           <input
