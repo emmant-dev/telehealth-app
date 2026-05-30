@@ -6,6 +6,7 @@ import { doctorApi } from "../api/doctor.api";
 import { useAuthStore } from "../store/auth.store";
 import type { UserRole } from "../types";
 import { formatDoctorBio } from "../utils/display";
+import { ui } from "../utils/ui";
 
 function Register() {
   const { register, isAuthenticated, role } = useAuthStore();
@@ -61,29 +62,32 @@ function Register() {
   };
 
   return (
-    <main style={{ maxWidth: 420, margin: "48px auto", fontFamily: "system-ui, sans-serif" }}>
-      <h1>Register</h1>
-      <form onSubmit={handleSubmit} style={{ display: "grid", gap: 12 }}>
-        <label>
+    <main className={ui.authPage}>
+      <h1 className={ui.heading1}>Register</h1>
+      <form onSubmit={handleSubmit} className={ui.form}>
+        <label className={ui.label}>
           Full name
           <input
+            className={ui.input}
             required
             value={fullName}
             onChange={(event) => setFullName(event.target.value)}
           />
         </label>
-        <label>
+        <label className={ui.label}>
           Email
           <input
+            className={ui.input}
             required
             type="email"
             value={email}
             onChange={(event) => setEmail(event.target.value)}
           />
         </label>
-        <label>
+        <label className={ui.label}>
           Password
           <input
+            className={ui.input}
             required
             minLength={8}
             type="password"
@@ -91,9 +95,10 @@ function Register() {
             onChange={(event) => setPassword(event.target.value)}
           />
         </label>
-        <label>
+        <label className={ui.label}>
           Role
           <select
+            className={ui.input}
             value={selectedRole}
             onChange={(event) => setSelectedRole(event.target.value as UserRole)}
           >
@@ -103,33 +108,35 @@ function Register() {
         </label>
         {selectedRole === "doctor" && (
           <>
-            <label>
+            <label className={ui.label}>
               Specialization
               <input
+                className={ui.input}
                 required
                 value={specialization}
                 onChange={(event) => setSpecialization(event.target.value)}
               />
             </label>
-            <label>
+            <label className={ui.label}>
               Bio
-              <textarea required value={bio} onChange={(event) => setBio(event.target.value)} />
+              <textarea className={ui.textarea} required value={bio} onChange={(event) => setBio(event.target.value)} />
             </label>
-            <label>
+            <label className={ui.label}>
               Experience
               <textarea
+                className={ui.textarea}
                 value={experience}
                 onChange={(event) => setExperience(event.target.value)}
               />
             </label>
           </>
         )}
-        {error && <p role="alert">{error}</p>}
-        <button type="submit" disabled={isSubmitting}>
+        {error && <p className={ui.alert} role="alert">{error}</p>}
+        <button className={ui.button} type="submit" disabled={isSubmitting}>
           {isSubmitting ? "Creating account..." : "Register"}
         </button>
       </form>
-      <p>
+      <p className={`${ui.muted} mt-5`}>
         Already have an account? <Link to="/login">Login</Link>
       </p>
     </main>

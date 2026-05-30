@@ -3,6 +3,7 @@ import type { FormEvent } from "react";
 import toast from "react-hot-toast";
 import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
 import { useAuthStore } from "../store/auth.store";
+import { ui } from "../utils/ui";
 
 function Login() {
   const { login, isAuthenticated, role } = useAuthStore();
@@ -40,33 +41,35 @@ function Login() {
   };
 
   return (
-    <main style={{ maxWidth: 420, margin: "48px auto", fontFamily: "system-ui, sans-serif" }}>
-      <h1>Login</h1>
-      <form onSubmit={handleSubmit} style={{ display: "grid", gap: 12 }}>
-        <label>
+    <main className={ui.authPage}>
+      <h1 className={ui.heading1}>Login</h1>
+      <form onSubmit={handleSubmit} className={ui.form}>
+        <label className={ui.label}>
           Email
           <input
+            className={ui.input}
             required
             type="email"
             value={email}
             onChange={(event) => setEmail(event.target.value)}
           />
         </label>
-        <label>
+        <label className={ui.label}>
           Password
           <input
+            className={ui.input}
             required
             type="password"
             value={password}
             onChange={(event) => setPassword(event.target.value)}
           />
         </label>
-        {error && <p role="alert">{error}</p>}
-        <button type="submit" disabled={isSubmitting}>
+        {error && <p className={ui.alert} role="alert">{error}</p>}
+        <button className={ui.button} type="submit" disabled={isSubmitting}>
           {isSubmitting ? "Logging in..." : "Login"}
         </button>
       </form>
-      <p>
+      <p className={`${ui.muted} mt-5`}>
         No account? <Link to="/register">Register</Link>
       </p>
     </main>

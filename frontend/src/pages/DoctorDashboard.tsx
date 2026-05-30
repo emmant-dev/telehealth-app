@@ -12,6 +12,7 @@ import {
   isDoctorProfileComplete,
   parseDoctorBio
 } from "../utils/display";
+import { ui } from "../utils/ui";
 
 type AppointmentCategory = "today" | "upcoming" | "past" | "completed" | "cancelled";
 
@@ -163,42 +164,35 @@ function DoctorDashboard() {
   const error = profileError || appointmentsError;
 
   return (
-    <main style={{ padding: 24 }}>
-      <h1>Doctor Dashboard</h1>
-      {error && <p role="alert">{error}</p>}
+    <main className={ui.page}>
+      <h1 className={ui.heading1}>Doctor Dashboard</h1>
+      {error && <p className={ui.alert} role="alert">{error}</p>}
 
-      <section>
-        <h2>Profile</h2>
-        <p>{profile ? `${profile.name} - ${profile.specialization}` : "Loading profile..."}</p>
+      <section className={ui.section}>
+        <h2 className={ui.heading2}>Profile</h2>
+        <p className={ui.muted}>{profile ? `${profile.name} - ${profile.specialization}` : "Loading profile..."}</p>
         {profile && !isProfileComplete && (
-          <div style={{ border: "1px solid #ddd", padding: 12, marginTop: 12 }}>
-            <p>
+          <div className={`${ui.card} mt-3`}>
+            <p className={ui.muted}>
               Your doctor profile is missing patient-facing details. Complete it so patients can see
               your bio, specialization, experience, and contact information.
             </p>
-            <Link to="/doctor/profile">Complete Profile</Link>
+            <Link className={ui.linkButton} to="/doctor/profile">Complete Profile</Link>
           </div>
         )}
         {profile && isProfileComplete && (
-          <p>
+          <p className={ui.muted}>
             Bio: {parsedProfileBio.bio || "Not provided"}{" "}
-            <Link to="/doctor/profile">Edit Profile</Link>
+            <Link className={ui.linkButton} to="/doctor/profile">Edit Profile</Link>
           </p>
         )}
       </section>
 
-      <section>
-        <div
-          style={{
-            alignItems: "center",
-            display: "flex",
-            flexWrap: "wrap",
-            gap: 12,
-            justifyContent: "space-between"
-          }}
-        >
-          <h2>Appointment Timeline</h2>
+      <section className={ui.section}>
+        <div className={ui.flexBetween}>
+          <h2 className={ui.heading2}>Appointment Timeline</h2>
           <button
+            className={ui.button}
             type="button"
             disabled={isRefreshing}
             onClick={() => void refreshAppointments({ detectChanges: true, showRefreshing: true })}
@@ -206,43 +200,41 @@ function DoctorDashboard() {
             {isRefreshing ? "Refreshing..." : "Refresh Appointments"}
           </button>
         </div>
-        <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 16 }}>
+        <div className={`${ui.flexWrap} mb-4`}>
           {appointmentCategories.map((category) => (
             <button
+              className={activeCategory === category.key ? ui.button : ui.secondaryButton}
               key={category.key}
               type="button"
               onClick={() => setActiveCategory(category.key)}
               aria-pressed={activeCategory === category.key}
-              style={{
-                fontWeight: activeCategory === category.key ? 700 : 400
-              }}
             >
               {category.label} ({appointmentGroups[category.key].length})
             </button>
           ))}
         </div>
-        <h3>{activeCategoryLabel} Appointments</h3>
-        {isLoading && <p>Loading appointments...</p>}
-        {!isLoading && visibleAppointments.length === 0 && <p>No appointments found.</p>}
-        <div style={{ display: "grid", gap: 12 }}>
+        <h3 className={ui.heading3}>{activeCategoryLabel} Appointments</h3>
+        {isLoading && <p className={ui.muted}>Loading appointments...</p>}
+        {!isLoading && visibleAppointments.length === 0 && <p className={ui.status}>No appointments found.</p>}
+        <div className={ui.grid}>
           {visibleAppointments.map((appointment) => (
-            <article key={appointment._id} style={{ border: "1px solid #ddd", padding: 12 }}>
-              <h4 style={{ marginBottom: 8 }}>{getAppointmentCounterparty(appointment, "doctor")}</h4>
-              <p>Date/time: {formatAppointmentDate(appointment.appointmentAt)}</p>
-              <p>Time: {formatAppointmentTime(appointment.appointmentAt)}</p>
-              <p>Specialization: {profile?.specialization || "Specialization unavailable"}</p>
-              <p>Patient: {getAppointmentCounterparty(appointment, "doctor")}</p>
-              <p>Status: {appointment.status}</p>
-              <p style={{ color: "#666", fontSize: 12 }}>Appointment ID: {appointment._id}</p>
-              <Link to={`/doctor/appointments/${appointment._id}`}>View Details</Link>
+            <article key={appointment._id} className={ui.card}>
+              <h4 className={ui.heading3}>{getAppointmentCounterparty(appointment, "doctor")}</h4>
+              <p className={ui.muted}>Date/time: {formatAppointmentDate(appointment.appointmentAt)}</p>
+              <p className={ui.muted}>Time: {formatAppointmentTime(appointment.appointmentAt)}</p>
+              <p className={ui.muted}>Specialization: {profile?.specialization || "Specialization unavailable"}</p>
+              <p className={ui.muted}>Patient: {getAppointmentCounterparty(appointment, "doctor")}</p>
+              <p className={ui.muted}>Status: {appointment.status}</p>
+              <p className={ui.smallMuted}>Appointment ID: {appointment._id}</p>
+              <Link className={ui.linkButton} to={`/doctor/appointments/${appointment._id}`}>View Details</Link>
             </article>
           ))}
         </div>
       </section>
 
-      <section>
-        <h2>Appointment Summary</h2>
-        <p>{appointments.length} total appointment(s)</p>
+      <section className={ui.section}>
+        <h2 className={ui.heading2}>Appointment Summary</h2>
+        <p className={ui.muted}>{appointments.length} total appointment(s)</p>
       </section>
     </main>
   );

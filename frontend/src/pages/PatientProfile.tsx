@@ -3,6 +3,7 @@ import type { FormEvent } from "react";
 import toast from "react-hot-toast";
 import { patientApi } from "../api/patient.api";
 import type { PatientProfile as PatientProfileType } from "../types";
+import { ui } from "../utils/ui";
 
 interface ProfileFormState {
   name: string;
@@ -122,58 +123,62 @@ function PatientProfile() {
   };
 
   return (
-    <main style={{ padding: 24 }}>
-      <h1>Patient Profile</h1>
-      {isLoading && <p>Loading profile...</p>}
-      {error && <p role="alert">{error}</p>}
+    <main className={ui.page}>
+      <h1 className={ui.heading1}>Patient Profile</h1>
+      {isLoading && <p className={ui.muted}>Loading profile...</p>}
+      {error && <p className={ui.alert} role="alert">{error}</p>}
       {!isLoading && (
-        <form onSubmit={handleSubmit} style={{ display: "grid", gap: 12, maxWidth: 560 }}>
-          <label>
+        <form onSubmit={handleSubmit} className={ui.formNarrow}>
+          <label className={ui.label}>
             Name
-            <input required value={form.name} onChange={(event) => updateField("name", event.target.value)} />
+            <input className={ui.input} required value={form.name} onChange={(event) => updateField("name", event.target.value)} />
           </label>
-          <label>
+          <label className={ui.label}>
             Birthday
             <input
+              className={ui.input}
               type="date"
               value={form.birthday}
               onChange={(event) => updateField("birthday", event.target.value)}
             />
           </label>
-          <label>
+          <label className={ui.label}>
             Weight (kg)
             <input
+              className={ui.input}
               min="0"
               type="number"
               value={form.weightKg}
               onChange={(event) => updateField("weightKg", event.target.value)}
             />
           </label>
-          <label>
+          <label className={ui.label}>
             Height (cm)
             <input
+              className={ui.input}
               min="0"
               type="number"
               value={form.heightCm}
               onChange={(event) => updateField("heightCm", event.target.value)}
             />
           </label>
-          <label>
+          <label className={ui.label}>
             Contact number
-            <input value={form.contactNumber} onChange={(event) => updateField("contactNumber", event.target.value)} />
+            <input className={ui.input} value={form.contactNumber} onChange={(event) => updateField("contactNumber", event.target.value)} />
           </label>
-          <label>
+          <label className={ui.label}>
             Address
-            <input value={form.address} onChange={(event) => updateField("address", event.target.value)} />
+            <input className={ui.input} value={form.address} onChange={(event) => updateField("address", event.target.value)} />
           </label>
-          <label>
+          <label className={ui.label}>
             Basic medical history
             <textarea
+              className={ui.textarea}
               value={form.basicMedicalHistory}
               onChange={(event) => updateField("basicMedicalHistory", event.target.value)}
             />
           </label>
-          <button type="submit" disabled={isSubmitting}>
+          <button className={ui.button} type="submit" disabled={isSubmitting}>
             {isSubmitting ? "Saving..." : "Save profile"}
           </button>
         </form>

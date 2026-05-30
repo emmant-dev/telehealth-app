@@ -5,6 +5,7 @@ import { Link } from "react-router-dom";
 import { doctorApi } from "../api/doctor.api";
 import type { DoctorProfile as DoctorProfileType } from "../types";
 import { formatDoctorBio, isDoctorProfileComplete, parseDoctorBio } from "../utils/display";
+import { ui } from "../utils/ui";
 
 const specializationOptions = [
   "Family Medicine",
@@ -117,35 +118,37 @@ function DoctorProfile() {
   };
 
   return (
-    <main style={{ padding: 24 }}>
+    <main className={ui.page}>
       <p>
-        <Link to="/doctor/dashboard">Back to dashboard</Link>
+        <Link className={ui.linkButton} to="/doctor/dashboard">Back to dashboard</Link>
       </p>
-      <h1>Doctor Profile</h1>
-      {error && <p role="alert">{error}</p>}
-      {isLoading && <p>Loading profile...</p>}
+      <h1 className={ui.heading1}>Doctor Profile</h1>
+      {error && <p className={ui.alert} role="alert">{error}</p>}
+      {isLoading && <p className={ui.muted}>Loading profile...</p>}
 
       {!isLoading && (
         <>
           {profile && !isDoctorProfileComplete(profile) && (
-            <p role="status">
+            <p className={ui.status} role="status">
               Complete your professional profile so patients can review your background before
               booking.
             </p>
           )}
 
-          <form onSubmit={handleSubmit} style={{ display: "grid", gap: 12, maxWidth: 640 }}>
-            <label>
+          <form onSubmit={handleSubmit} className={ui.formWide}>
+            <label className={ui.label}>
               Full name
               <input
+                className={ui.input}
                 required
                 value={fullName}
                 onChange={(event) => setFullName(event.target.value)}
               />
             </label>
-            <label>
+            <label className={ui.label}>
               Specialization
               <select
+                className={ui.input}
                 required
                 value={specialization}
                 onChange={(event) => setSpecialization(event.target.value)}
@@ -162,31 +165,34 @@ function DoctorProfile() {
                 ))}
               </select>
             </label>
-            <label>
+            <label className={ui.label}>
               Bio / description
               <textarea
+                className={ui.textarea}
                 required
                 rows={5}
                 value={bio}
                 onChange={(event) => setBio(event.target.value)}
               />
             </label>
-            <label>
+            <label className={ui.label}>
               Experience
               <input
+                className={ui.input}
                 placeholder="Example: 8 years in family medicine"
                 value={experience}
                 onChange={(event) => setExperience(event.target.value)}
               />
             </label>
-            <label>
+            <label className={ui.label}>
               Contact information
               <input
+                className={ui.input}
                 value={contactNumber}
                 onChange={(event) => setContactNumber(event.target.value)}
               />
             </label>
-            <button type="submit" disabled={isSaving}>
+            <button className={ui.button} type="submit" disabled={isSaving}>
               {isSaving ? "Saving..." : profile && isDoctorProfileComplete(profile) ? "Update Profile" : "Complete Profile"}
             </button>
           </form>
