@@ -1,9 +1,10 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { appointmentApi } from "../api/appointment.api";
 import { notificationApi } from "../api/notification.api";
 import { patientApi } from "../api/patient.api";
 import type { Appointment, Notification, PatientProfile } from "../types";
+import { subscribeToRefreshEvents } from "../utils/refreshEvents";
 
 function PatientDashboard() {
   const [profile, setProfile] = useState<PatientProfile | null>(null);
@@ -11,24 +12,62 @@ function PatientDashboard() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [error, setError] = useState("");
 
+  const loadDashboard = useCallback(async () => {
+    try {
+      const [patientProfile, patientAppointments, userNotifications] = await Promise.all([
+        patientApi.getMe(),
+        appointmentApi.listMine(),
+        notificationApi.listMine()
+      ]);
+      setProfile(patientProfile);
+      setAppointments(patientAppointments);
+      setNotifications(userNotifications);
+      setError("");
+    } catch (caughtError) {
+      setError(caughtError instanceof Error ? caughtError.message : "Unable to load dashboard");
+    }
+  }, []);
+
   useEffect(() => {
-    const loadDashboard = async () => {
+    let isMounted = true;
+
+    const loadInitialDashboard = async () => {
       try {
         const [patientProfile, patientAppointments, userNotifications] = await Promise.all([
           patientApi.getMe(),
           appointmentApi.listMine(),
           notificationApi.listMine()
         ]);
+
+        if (!isMounted) {
+          return;
+        }
+
         setProfile(patientProfile);
         setAppointments(patientAppointments);
         setNotifications(userNotifications);
+        setError("");
       } catch (caughtError) {
-        setError(caughtError instanceof Error ? caughtError.message : "Unable to load dashboard");
+        if (isMounted) {
+          setError(caughtError instanceof Error ? caughtError.message : "Unable to load dashboard");
+        }
       }
     };
 
-    void loadDashboard();
+    void loadInitialDashboard();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
+
+  useEffect(() => {
+    return subscribeToRefreshEvents((eventType) => {
+      if (eventType === "appointments" || eventType === "medical-records") {
+        void loadDashboard();
+      }
+    });
+  }, [loadDashboard]);
 
   return (
     <main style={{ padding: 24 }}>

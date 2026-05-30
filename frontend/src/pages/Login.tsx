@@ -1,5 +1,6 @@
 import { useState } from "react";
 import type { FormEvent } from "react";
+import toast from "react-hot-toast";
 import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
 import { useAuthStore } from "../store/auth.store";
 
@@ -20,15 +21,19 @@ function Login() {
     event.preventDefault();
     setError("");
     setIsSubmitting(true);
+    const toastId = toast.loading("Logging in...");
 
     try {
       const user = await login({ email, password });
+      toast.success("Login successful", { id: toastId });
       const from = location.state?.from?.pathname;
       navigate(from || (user.role === "doctor" ? "/doctor/dashboard" : "/patient/dashboard"), {
         replace: true
       });
     } catch (caughtError) {
-      setError(caughtError instanceof Error ? caughtError.message : "Login failed");
+      const message = caughtError instanceof Error ? caughtError.message : "Login failed";
+      setError(message);
+      toast.error(message, { id: toastId });
     } finally {
       setIsSubmitting(false);
     }

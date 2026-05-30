@@ -1,5 +1,7 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import type { FormEvent } from "react";
+import toast from "react-hot-toast";
+import { Link } from "react-router-dom";
 import { appointmentApi } from "../api/appointment.api";
 import { patientApi } from "../api/patient.api";
 import type { Appointment } from "../types";
@@ -10,7 +12,7 @@ import {
   getAppointmentDoctorId,
   getEmbeddedDoctor
 } from "../utils/display";
-import { Link } from "react-router-dom";
+import { emitRefreshEvent, subscribeToRefreshEvents } from "../utils/refreshEvents";
 
 function PatientAppointments() {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
@@ -18,9 +20,8 @@ function PatientAppointments() {
   const [isLoading, setIsLoading] = useState(true);
   const [mutatingAppointmentId, setMutatingAppointmentId] = useState("");
   const [error, setError] = useState("");
-  const [successMessage, setSuccessMessage] = useState("");
 
-  const loadAppointments = async () => {
+  const loadAppointments = useCallback(async () => {
     setError("");
 
     try {
@@ -29,7 +30,7 @@ function PatientAppointments() {
     } catch (caughtError) {
       setError(caughtError instanceof Error ? caughtError.message : "Unable to load appointments");
     }
-  };
+  }, []);
 
   useEffect(() => {
     let isMounted = true;
@@ -59,17 +60,28 @@ function PatientAppointments() {
     };
   }, []);
 
+  useEffect(() => {
+    return subscribeToRefreshEvents((eventType) => {
+      if (eventType === "appointments") {
+        void loadAppointments();
+      }
+    });
+  }, [loadAppointments]);
+
   const handleCancel = async (appointmentId: string) => {
     setError("");
-    setSuccessMessage("");
     setMutatingAppointmentId(appointmentId);
+    const toastId = toast.loading("Cancelling appointment...");
 
     try {
       await appointmentApi.cancel(appointmentId);
-      setSuccessMessage("Appointment cancelled.");
       await loadAppointments();
+      toast("Appointment cancelled", { id: toastId });
+      emitRefreshEvent("appointments");
     } catch (caughtError) {
-      setError(caughtError instanceof Error ? caughtError.message : "Unable to cancel appointment");
+      const message = caughtError instanceof Error ? caughtError.message : "Unable to cancel appointment";
+      setError(message);
+      toast.error(message, { id: toastId });
     } finally {
       setMutatingAppointmentId("");
     }
@@ -81,24 +93,28 @@ function PatientAppointments() {
   ) => {
     event.preventDefault();
     setError("");
-    setSuccessMessage("");
 
     const nextDate = rescheduleValues[appointmentId];
 
     if (!nextDate) {
       setError("Select a new appointment date and time.");
+      toast.error("Select a new appointment date and time.");
       return;
     }
 
     setMutatingAppointmentId(appointmentId);
+    const toastId = toast.loading("Rescheduling appointment...");
 
     try {
       await appointmentApi.reschedule(appointmentId, new Date(nextDate).toISOString());
       setRescheduleValues((current) => ({ ...current, [appointmentId]: "" }));
-      setSuccessMessage("Appointment rescheduled.");
       await loadAppointments();
+      toast.success("Appointment rescheduled", { id: toastId });
+      emitRefreshEvent("appointments");
     } catch (caughtError) {
-      setError(caughtError instanceof Error ? caughtError.message : "Unable to reschedule appointment");
+      const message = caughtError instanceof Error ? caughtError.message : "Unable to reschedule appointment";
+      setError(message);
+      toast.error(message, { id: toastId });
     } finally {
       setMutatingAppointmentId("");
     }
@@ -108,7 +124,6 @@ function PatientAppointments() {
     <main style={{ padding: 24 }}>
       <h1>My Appointments</h1>
       {error && <p role="alert">{error}</p>}
-      {successMessage && <p role="status">{successMessage}</p>}
       {isLoading && <p>Loading appointments...</p>}
       {!isLoading && appointments.length === 0 && <p>No appointments yet.</p>}
       <div style={{ display: "grid", gap: 12 }}>
