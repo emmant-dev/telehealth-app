@@ -1,4 +1,5 @@
 import { Link, Outlet, useNavigate } from "react-router-dom";
+import telehealthLogo from "../assets/telehealth-logo.svg";
 import { useAuthStore } from "../store/auth.store";
 import { ui } from "../utils/ui";
 
@@ -18,10 +19,17 @@ function AppLayout() {
       >
         <nav className="flex flex-wrap items-center gap-2 sm:gap-3 md:gap-4">
           <Link
-            className="mr-1 inline-flex min-w-0 items-center gap-2 text-base font-extrabold text-[#111111] no-underline before:h-7 before:w-7 before:shrink-0 before:rounded-[10px] before:bg-gradient-to-br before:from-[#14B84A] before:to-[#0C9A3D] before:shadow-[0_10px_18px_rgba(20,184,74,0.24)] hover:text-[#0C9A3D] hover:no-underline sm:gap-2.5 sm:text-[1.05rem] md:mr-3 lg:text-lg"
+            className="mr-1 inline-flex min-w-0 items-center text-base font-extrabold text-[#111111] no-underline hover:text-[#0C9A3D] hover:no-underline md:mr-3"
             to={user?.role === "doctor" ? "/doctor/dashboard" : "/patient/dashboard"}
           >
-            Telehealth MVP
+            <img
+              alt="Telehealth"
+              className="h-9 w-9 shrink-0 object-contain sm:h-10 sm:w-10 lg:h-11 lg:w-11"
+              src={telehealthLogo}
+              onError={(event) => {
+                event.currentTarget.replaceWith(document.createTextNode("Telehealth"));
+              }}
+            />
           </Link>
           {user?.role === "patient" && (
             <>
