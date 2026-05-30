@@ -22,7 +22,7 @@ export const ui = {
   secondaryButton:
     "inline-flex min-h-[42px] w-full items-center justify-center rounded-full border border-[#DDEEDD] bg-white px-4.5 py-2.5 text-center font-extrabold text-[#0C9A3D] shadow-none transition hover:-translate-y-px hover:bg-[#EAFFE0] disabled:cursor-not-allowed disabled:opacity-55 sm:w-auto",
   linkButton:
-    "mb-4 inline-flex min-h-10 w-full items-center justify-center rounded-full bg-[#EAFFE0] px-3.5 py-2 text-center font-extrabold text-[#0C9A3D] no-underline hover:bg-[#D6FFD7] sm:w-auto",
+    "mb-4 mt-4 inline-flex min-h-10 w-full items-center justify-center rounded-full bg-[#EAFFE0] px-3.5 py-2 text-center font-extrabold text-[#0C9A3D] no-underline hover:bg-[#D6FFD7] sm:w-auto",
   heading1: "mb-5 text-3xl font-extrabold leading-tight text-[#111111] after:mt-3 after:block after:h-1.5 after:w-16 after:rounded-full after:bg-[#14B84A] sm:mb-6 sm:text-4xl sm:after:w-18 md:mb-7 lg:text-[2.75rem]",
   heading2: "mb-3 text-xl font-extrabold leading-tight text-[#111111] sm:mb-3.5 sm:text-2xl md:mb-4",
   heading3: "mb-2.5 text-lg font-extrabold leading-tight text-[#111111]",

@@ -10,14 +10,19 @@ import {
   getConsultationLink,
   getAppointmentCounterparty,
   getAppointmentDoctorId,
-  getEmbeddedDoctor
+  getEmbeddedDoctor,
 } from "../utils/display";
-import { emitRefreshEvent, subscribeToRefreshEvents } from "../utils/refreshEvents";
+import {
+  emitRefreshEvent,
+  subscribeToRefreshEvents,
+} from "../utils/refreshEvents";
 import { ui } from "../utils/ui";
 
 function PatientAppointments() {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
-  const [rescheduleValues, setRescheduleValues] = useState<Record<string, string>>({});
+  const [rescheduleValues, setRescheduleValues] = useState<
+    Record<string, string>
+  >({});
   const [isLoading, setIsLoading] = useState(true);
   const [mutatingAppointmentId, setMutatingAppointmentId] = useState("");
   const [error, setError] = useState("");
@@ -29,7 +34,11 @@ function PatientAppointments() {
       const appointmentList = await patientApi.getAppointments();
       setAppointments(appointmentList);
     } catch (caughtError) {
-      setError(caughtError instanceof Error ? caughtError.message : "Unable to load appointments");
+      setError(
+        caughtError instanceof Error
+          ? caughtError.message
+          : "Unable to load appointments",
+      );
     }
   }, []);
 
@@ -45,7 +54,11 @@ function PatientAppointments() {
         }
       } catch (caughtError) {
         if (isMounted) {
-          setError(caughtError instanceof Error ? caughtError.message : "Unable to load appointments");
+          setError(
+            caughtError instanceof Error
+              ? caughtError.message
+              : "Unable to load appointments",
+          );
         }
       } finally {
         if (isMounted) {
@@ -80,7 +93,10 @@ function PatientAppointments() {
       toast("Appointment cancelled", { id: toastId });
       emitRefreshEvent("appointments");
     } catch (caughtError) {
-      const message = caughtError instanceof Error ? caughtError.message : "Unable to cancel appointment";
+      const message =
+        caughtError instanceof Error
+          ? caughtError.message
+          : "Unable to cancel appointment";
       setError(message);
       toast.error(message, { id: toastId });
     } finally {
@@ -90,7 +106,7 @@ function PatientAppointments() {
 
   const handleReschedule = async (
     event: FormEvent<HTMLFormElement>,
-    appointmentId: string
+    appointmentId: string,
   ) => {
     event.preventDefault();
     setError("");
@@ -107,13 +123,19 @@ function PatientAppointments() {
     const toastId = toast.loading("Rescheduling appointment...");
 
     try {
-      await appointmentApi.reschedule(appointmentId, new Date(nextDate).toISOString());
+      await appointmentApi.reschedule(
+        appointmentId,
+        new Date(nextDate).toISOString(),
+      );
       setRescheduleValues((current) => ({ ...current, [appointmentId]: "" }));
       await loadAppointments();
       toast.success("Appointment rescheduled", { id: toastId });
       emitRefreshEvent("appointments");
     } catch (caughtError) {
-      const message = caughtError instanceof Error ? caughtError.message : "Unable to reschedule appointment";
+      const message =
+        caughtError instanceof Error
+          ? caughtError.message
+          : "Unable to reschedule appointment";
       setError(message);
       toast.error(message, { id: toastId });
     } finally {
@@ -124,49 +146,70 @@ function PatientAppointments() {
   return (
     <main className={ui.page}>
       <h1 className={ui.heading1}>My Appointments</h1>
-      {error && <p className={ui.alert} role="alert">{error}</p>}
+      {error && (
+        <p className={ui.alert} role="alert">
+          {error}
+        </p>
+      )}
       {isLoading && <p className={ui.muted}>Loading appointments...</p>}
-      {!isLoading && appointments.length === 0 && <p className={ui.status}>No appointments yet.</p>}
+      {!isLoading && appointments.length === 0 && (
+        <p className={ui.status}>No appointments yet.</p>
+      )}
       <div className={ui.grid}>
         {appointments.map((appointment) => {
           const consultationLink = getConsultationLink(appointment._id);
           const embeddedDoctor = getEmbeddedDoctor(appointment);
           const doctorId = getAppointmentDoctorId(appointment);
           const isMutable =
-            appointment.status === "pending" || appointment.status === "confirmed";
+            appointment.status === "pending" ||
+            appointment.status === "confirmed";
 
           return (
             <article key={appointment._id} className={ui.card}>
-              <h2 className={ui.heading2}>{formatAppointmentDate(appointment.appointmentAt)}</h2>
-              <p className={ui.muted}>Doctor: {getAppointmentCounterparty(appointment, "patient")}</p>
+              <h2 className={ui.heading2}>
+                {formatAppointmentDate(appointment.appointmentAt)}
+              </h2>
+              <p className={ui.muted}>
+                Doctor: {getAppointmentCounterparty(appointment, "patient")}
+              </p>
               {doctorId ? (
                 <p>
-                  <Link className={ui.linkButton} to={`/patient/doctors/${doctorId}`} state={{ doctor: embeddedDoctor }}>
+                  <Link
+                    className={ui.linkButton}
+                    to={`/patient/doctors/${doctorId}`}
+                    state={{ doctor: embeddedDoctor }}
+                  >
                     View Details
                   </Link>
                 </p>
               ) : (
-                <p className={ui.muted}>Doctor information unavailable for this appointment</p>
+                <p className={ui.muted}>
+                  Doctor information unavailable for this appointment
+                </p>
               )}
               <p className={ui.muted}>Status: {appointment.status}</p>
-              {appointment.reason && <p className={ui.muted}>Reason: {appointment.reason}</p>}
+              {appointment.reason && (
+                <p className={ui.muted}>Reason: {appointment.reason}</p>
+              )}
 
               <div className="mt-3">
-                <a className={ui.button} href={consultationLink} target="_blank" rel="noreferrer">
+                <a
+                  className={ui.button}
+                  href={consultationLink}
+                  target="_blank"
+                  rel="noreferrer"
+                >
                   Join Consultation
                 </a>
               </div>
 
               <div className="mt-3 grid w-full gap-2 sm:max-w-[480px]">
-                <button
-                  className={ui.button}
-                  type="button"
-                  disabled={!isMutable || mutatingAppointmentId === appointment._id}
-                  onClick={() => void handleCancel(appointment._id)}
+                <form
+                  className={ui.form}
+                  onSubmit={(event) =>
+                    void handleReschedule(event, appointment._id)
+                  }
                 >
-                  Cancel Appointment
-                </button>
-                <form className={ui.form} onSubmit={(event) => void handleReschedule(event, appointment._id)}>
                   <label className={ui.label}>
                     New date and time
                     <input
@@ -177,15 +220,27 @@ function PatientAppointments() {
                       onChange={(event) =>
                         setRescheduleValues((current) => ({
                           ...current,
-                          [appointment._id]: event.target.value
+                          [appointment._id]: event.target.value,
                         }))
                       }
                     />
                   </label>
                   <button
                     className={ui.button}
+                    type="button"
+                    disabled={
+                      !isMutable || mutatingAppointmentId === appointment._id
+                    }
+                    onClick={() => void handleCancel(appointment._id)}
+                  >
+                    Cancel Appointment
+                  </button>
+                  <button
+                    className={ui.button}
                     type="submit"
-                    disabled={!isMutable || mutatingAppointmentId === appointment._id}
+                    disabled={
+                      !isMutable || mutatingAppointmentId === appointment._id
+                    }
                   >
                     Reschedule Appointment
                   </button>
